@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#12163F">
+<title>Nifemi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo: #1B2160;
+    --indigo-deep: #12163F;
+    --chalk: #F3EEF8;
+    --zobo: #C21F4B;
+    --gold: #F4B942;
+    --serif: "Fraunces", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --desk: #D9CDB4;
+    --paper: #FBF6EA;
+    --ink: #2B2420;
+    --pen: #1B2160;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--chalk);
+    font-family: var(--serif);
+    background-color: var(--indigo-deep);
+    /* adire-style dye rings, two layers offset to make a repeating cloth pattern */
+    background-image:
+      radial-gradient(circle at center, transparent 0 9px, rgba(243,238,248,.07) 9px 11px, transparent 11px 19px, rgba(243,238,248,.07) 19px 21px, transparent 21px 29px, rgba(243,238,248,.07) 29px 31px, transparent 31px),
+      radial-gradient(circle at center, transparent 0 9px, rgba(243,238,248,.07) 9px 11px, transparent 11px 19px, rgba(243,238,248,.07) 19px 21px, transparent 21px 29px, rgba(243,238,248,.07) 29px 31px, transparent 31px);
+    background-size: 84px 84px;
+    background-position: 0 0, 42px 42px;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 50% at 50% 30%, rgba(27,33,96,.95), rgba(18,22,63,0) 70%);
+  }
+
+  main {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 24rem;
+    text-align: center;
+  }
+  .screen.active {
+    display: block;
+    animation: arrive .6s ease both;
+  }
+  @keyframes arrive {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .note {
+    font-family: var(--hand);
+    font-size: 1.5rem;
+    color: var(--gold);
+    transform: rotate(-2deg);
+    margin-bottom: .25rem;
+  }
+
+  h1 {
+    font-size: clamp(3.4rem, 17vw, 5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+
+  .sub {
+    margin: 1rem auto 1.5rem;
+    max-width: 19rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    opacity: .85;
+  }
+
+  /* passcode dots */
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: .8rem;
+    margin-bottom: .75rem;
+  }
+  .dots span {
+    width: .95rem;
+    height: .95rem;
+    border-radius: 50%;
+    border: 2px solid var(--chalk);
+    transition: background .15s, transform .15s;
+  }
+  .dots span.on { background: var(--gold); border-color: var(--gold); transform: scale(1.15); }
+  .dots.shake { animation: shake .45s; }
+  @keyframes shake {
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+
+  .msg {
+    min-height: 1.6rem;
+    margin-bottom: .75rem;
+    font-family: var(--hand);
+    font-size: 1.45rem;
+    color: var(--gold);
+  }
+
+  /* stitched keypad */
+  .pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .9rem;
+    justify-items: center;
+    max-width: 17rem;
+    margin: 0 auto;
+  }
+  .key {
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50%;
+    border: 2px dashed rgba(243,238,248,.55);
+    background: rgba(243,238,248,.05);
+    color: var(--chalk);
+    font: 500 1.6rem var(--serif);
+    cursor: pointer;
+    transition: background .12s, border-color .12s, transform .12s;
+  }
+  .key:active { background: var(--zobo); border-color: var(--zobo); transform: scale(.94); }
+  .key.ghost { visibility: hidden; }
+  .key.del { font-size: 1.3rem; }
+
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  .hint {
+    display: none;
+    margin: 1.5rem auto 0;
+    max-width: 17rem;
+    font-size: .95rem;
+    line-height: 1.45;
+    opacity: .8;
+    font-style: italic;
+  }
+  .hint.show { display: block; }
+
+  /* loading */
+  .counter {
+    font-size: clamp(4rem, 22vw, 6rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .counter-label {
+    font-family: var(--hand);
+    font-size: 1.9rem;
+    color: var(--gold);
+    margin-top: .25rem;
+  }
+
+  .thread {
+    position: relative;
+    height: 2rem;
+    margin: 2.25rem 0 .75rem;
+  }
+  .thread::before,
+  .thread-fill {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    border-top: 3px dashed rgba(243,238,248,.3);
+  }
+  .thread::before { right: 0; }
+  .thread-fill { width: 0; border-top-color: var(--gold); }
+  .needle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -52%);
+    color: var(--zobo);
+    font-size: 1.7rem;
+    line-height: 1;
+    text-shadow: 0 0 12px rgba(194,31,75,.7);
+  }
+
+  .pct {
+    font-size: .95rem;
+    letter-spacing: .04em;
+    opacity: .7;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .line {
+    min-height: 4.2rem;
+    margin: 1rem auto 0;
+    max-width: 20rem;
+    font-size: 1.15rem;
+    line-height: 1.45;
+    font-style: italic;
+  }
+
+  .finale {
+    display: none;
+    margin-top: 1.25rem;
+  }
+  .finale.show { display: block; animation: arrive .8s ease both; }
+  .finale p {
+    font-family: var(--hand);
+    font-size: 1.7rem;
+    line-height: 1.2;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+  }
+
+  .begin {
+    display: inline-block;
+    padding: .95rem 2.4rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--zobo);
+    color: var(--chalk);
+    font: 600 1.15rem var(--serif);
+    cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(194,31,75,.25);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .begin:active { transform: scale(.96); box-shadow: 0 0 0 7px rgba(194,31,75,.25); }
+
+  /* quiz */
+  .screen.active.fade { animation: pop .5s ease both; }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    margin: .6rem 0 1.5rem;
+  }
+  .steps span {
+    width: .85rem;
+    height: .85rem;
+    border-radius: 50%;
+    border: 2px dashed rgba(243,238,248,.55);
+    transition: background .2s, border-color .2s;
+  }
+  .steps span.done { background: var(--gold); border: 2px solid var(--gold); }
+  .steps span.now  { border: 2px solid var(--chalk); }
+
+  .qtext {
+    font-size: clamp(1.7rem, 7.4vw, 2.2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .opts { display: grid; gap: .75rem; }
+  .opt {
+    width: 100%;
+    padding: .95rem 1.1rem;
+    border-radius: 1.2rem;
+    border: 2px dashed rgba(243,238,248,.55);
+    background: rgba(243,238,248,.05);
+    color: var(--chalk);
+    font: 500 1.05rem/1.35 var(--serif);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .12s;
+  }
+  .opt:active:not(:disabled) { transform: scale(.98); background: rgba(194,31,75,.5); }
+  .opt:disabled { cursor: default; }
+  .opt.right { background: var(--gold); border: 2px solid var(--gold); color: var(--indigo-deep); font-weight: 700; }
+  .opt.wrong { background: var(--zobo); border: 2px solid var(--zobo); }
+  .opt.dim { opacity: .45; }
+
+  .reply {
+    min-height: 4.5rem;
+    margin: 1.25rem auto 0;
+    max-width: 22rem;
+    font-family: var(--hand);
+    font-size: 1.65rem;
+    line-height: 1.2;
+    color: var(--gold);
+  }
+  .go {
+    display: inline-block;
+    margin-top: .5rem;
+    padding: .95rem 2.4rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--zobo);
+    color: var(--chalk);
+    font: 600 1.15rem var(--serif);
+    cursor: pointer;
+    box-shadow: 0 0 0 4px rgba(194,31,75,.25);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .go:active { transform: scale(.96); box-shadow: 0 0 0 7px rgba(194,31,75,.25); }
+  .go[hidden] { display: none; }
+
+  .score {
+    font-size: clamp(4.5rem, 24vw, 6.5rem);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .verdict {
+    margin: 1rem auto 1.75rem;
+    max-width: 21rem;
+    font-size: 1.2rem;
+    line-height: 1.45;
+    font-style: italic;
+  }
+
+  /* ===== contract (paper mode) ===== */
+  body { transition: background-color .6s; }
+  body.paper-mode {
+    color: var(--ink);
+    background-color: var(--desk);
+    background-image:
+      repeating-linear-gradient(45deg, rgba(43,36,32,.025) 0 2px, transparent 2px 7px),
+      radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.35), transparent 60%);
+    background-size: auto;
+    background-position: 0 0;
+  }
+  body.paper-mode::before { display: none; }
+  body.paper-mode :focus-visible { outline-color: var(--zobo); }
+
+  #terms.screen {
+    max-width: 34rem;
+    text-align: left;
+    --gold: #B98A2E;
+    --serif: "EB Garamond", Georgia, serif;
+    --display: "Fraunces", Georgia, serif;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 1.12rem;
+    line-height: 1.55;
+  }
+
+  .paper {
+    position: relative;
+    padding: 2rem 1.35rem 2.25rem;
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(0deg, transparent 0 31px, rgba(185,138,46,.07) 31px 32px);
+    border: 4px double var(--ink);
+    box-shadow: 0 2px 0 rgba(43,36,32,.15), 0 18px 40px rgba(43,36,32,.28);
+  }
+  .paper::before {
+    content: "";
+    position: absolute;
+    inset: .45rem;
+    border: 1px solid rgba(43,36,32,.45);
+    pointer-events: none;
+  }
+  .paper.thump { animation: thump .5s ease; }
+  @keyframes thump {
+    0%, 100% { transform: none; }
+    35% { transform: translateY(5px); }
+    60% { transform: translateY(-1px); }
+  }
+
+  .letterhead {
+    text-align: center;
+    font-size: .8rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .thead {
+    margin: .6rem 0 .4rem;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
+    line-height: 1.15;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    font-variation-settings: "SOFT" 60, "WONK" 0;
+  }
+  .rule {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin: .9rem 0 1.1rem;
+    color: var(--gold);
+  }
+  .rule::before, .rule::after { content: ""; flex: 1; border-top: 1px solid currentColor; }
+  .lede { text-align: center; font-style: italic; margin-bottom: 1.1rem; }
+  .preamble { margin-bottom: 1.4rem; text-align: justify; hyphens: auto; }
+
+  .clause { margin-bottom: 1.15rem; }
+  .io .clause { opacity: 0; transform: translateY(8px); transition: opacity .6s ease, transform .6s ease; }
+  .io .clause.in { opacity: 1; transform: none; }
+  .clause h2 {
+    font-family: var(--display);
+    font-size: .95rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-variation-settings: "SOFT" 60, "WONK" 0;
+  }
+  .clause h2 span { color: var(--zobo); margin-right: .35rem; }
+  .clause p { text-align: justify; hyphens: auto; }
+  .final p { font-style: italic; }
+
+  .sign { margin-top: 2rem; position: relative; }
+  .sign h3 {
+    font-family: var(--display);
+    font-size: .85rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: .6rem;
+  }
+  .agree {
+    display: flex;
+    gap: .65rem;
+    align-items: flex-start;
+    margin-bottom: 1.1rem;
+    cursor: pointer;
+  }
+  .agree input { width: 1.3rem; height: 1.3rem; margin-top: .2rem; accent-color: var(--zobo); flex: none; }
+
+  .sigbox { position: relative; }
+  #pad {
+    display: block;
+    width: 100%;
+    height: 9rem;
+    border-bottom: 2px solid var(--ink);
+    background: transparent;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .sigbox .x {
+    position: absolute;
+    left: .2rem;
+    bottom: .5rem;
+    font-family: var(--display);
+    font-size: 1.4rem;
+    color: rgba(43,36,32,.45);
+    pointer-events: none;
+  }
+  .sighint {
+    position: absolute;
+    inset: 0 0 auto 0;
+    text-align: center;
+    padding-top: 2.7rem;
+    font-family: var(--hand);
+    font-size: 1.5rem;
+    color: rgba(43,36,32,.38);
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+  .sigbox.inked .sighint { opacity: 0; }
+  .sigbox.shake { animation: shake .45s; }
+  .caption { font-size: .9rem; font-style: italic; margin-top: .3rem; display: flex; justify-content: space-between; gap: .5rem; }
+  .linkbtn {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--pen);
+    font: inherit;
+    font-size: .9rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .linkbtn[hidden] { display: none; }
+
+  .second { margin-top: 1.4rem; }
+  .second .pre {
+    font-family: var(--hand);
+    font-weight: 700;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--pen);
+    border-bottom: 2px solid var(--ink);
+    padding: 0 0 .15rem .4rem;
+    transform: rotate(-2deg);
+    transform-origin: left bottom;
+  }
+
+  .tmsg {
+    min-height: 1.5rem;
+    margin-top: .9rem;
+    font-family: var(--hand);
+    font-size: 1.45rem;
+    color: var(--zobo);
+    text-align: center;
+  }
+  .seal-btn {
+    display: block;
+    width: 100%;
+    margin-top: .4rem;
+    padding: 1rem 1.25rem;
+    border: 0;
+    border-radius: .4rem;
+    background: var(--ink);
+    color: var(--paper);
+    font: 600 1.05rem var(--display);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform .12s, background .2s, opacity .2s;
+  }
+  .seal-btn:active:not(:disabled) { transform: scale(.98); }
+  .seal-btn:disabled { opacity: .35; cursor: default; }
+
+  .seal {
+    position: absolute;
+    right: .2rem;
+    bottom: 5.7rem;
+    width: 6.6rem;
+    height: 6.6rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: rgba(255,240,240,.92);
+    background: radial-gradient(circle at 34% 28%, #E4466F, #C21F4B 48%, #8A1034 100%);
+    box-shadow: 0 3px 8px rgba(43,36,32,.45), inset 0 0 0 4px rgba(138,16,52,.55), inset 0 0 14px rgba(0,0,0,.28);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(2.6) rotate(-30deg);
+  }
+  .seal::before {
+    content: "";
+    position: absolute;
+    inset: .6rem;
+    border-radius: 50%;
+    border: 2px dashed rgba(255,240,240,.55);
+  }
+  .seal-in { text-align: center; line-height: 1; }
+  .seal-in b { display: block; font: 700 1.9rem var(--display); }
+  .seal-in small { display: block; margin-top: .25rem; font: 600 .62rem var(--serif); letter-spacing: .18em; text-transform: uppercase; }
+  .seal.stamp { animation: stamp .55s cubic-bezier(.2,.9,.25,1.15) forwards; }
+  @keyframes stamp {
+    0%   { opacity: 0; transform: scale(2.6) rotate(-30deg); }
+    55%  { opacity: 1; transform: scale(.9) rotate(-8deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-8deg); }
+  }
+
+  .after { margin-top: 2.25rem; text-align: center; }
+  .after[hidden] { display: none; }
+  .after.show { animation: rise .8s ease both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .after p {
+    font-family: var(--hand);
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+    line-height: 1.15;
+    font-weight: 700;
+    color: var(--pen);
+    margin-bottom: 1.4rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .paper.thump, .sigbox.shake, .after.show { animation: none; }
+    .seal.stamp { animation: none; opacity: 1; transform: rotate(-8deg); }
+    .screen.active, .screen.active.fade, .finale.show { animation: none; }
+    .dots.shake { animation: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- GATE -->
+  <section class="screen active" id="gate" aria-labelledby="title">
+    <p class="note">for Ife's eyes only</p>
+    <h1 id="title">Nifemi</h1>
+    <p class="sub">This page is locked, and you hold the only key. Type the day it all began.</p>
+
+    <div class="dots" id="dots" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+    <div class="pad" role="group" aria-label="Passcode keypad">
+      <button class="key" data-k="1">1</button>
+      <button class="key" data-k="2">2</button>
+      <button class="key" data-k="3">3</button>
+      <button class="key" data-k="4">4</button>
+      <button class="key" data-k="5">5</button>
+      <button class="key" data-k="6">6</button>
+      <button class="key" data-k="7">7</button>
+      <button class="key" data-k="8">8</button>
+      <button class="key" data-k="9">9</button>
+      <button class="key ghost" tabindex="-1" aria-hidden="true"></button>
+      <button class="key" data-k="0">0</button>
+      <button class="key del" data-k="del" aria-label="Delete last digit">&#9003;</button>
+    </div>
+
+    <p class="hint" id="hint">Hint: day, month, year, two digits each. Six numbers in total.</p>
+  </section>
+
+  <!-- LOADING -->
+  <section class="screen" id="loading" aria-live="polite">
+    <div class="counter" id="count">0</div>
+    <div class="counter-label">days of us, loading</div>
+
+    <div class="thread" aria-hidden="true">
+      <div class="thread-fill" id="fill"></div>
+      <div class="needle" id="needle">&#9829;</div>
+    </div>
+    <div class="pct" id="pct">0%</div>
+
+    <p class="line" id="line">Opening the memory vault...</p>
+
+    <div class="finale" id="finale">
+      <p>Ife Nifemi.<br>Both are true.</p>
+      <button class="begin" id="begin">Begin</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="quiz" aria-live="polite">
+    <p class="note">pop quiz, no pressure</p>
+    <div class="steps" id="steps" aria-hidden="true"></div>
+    <h2 class="qtext" id="q"></h2>
+    <div class="opts" id="opts"></div>
+    <p class="reply" id="reply" role="status"></p>
+    <button class="go" id="next" hidden>Next</button>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="result">
+    <p class="note">and the results are in</p>
+    <div class="score" id="score"></div>
+    <p class="verdict" id="verdict"></p>
+    <button class="go" id="onward">Continue</button>
+  </section>
+
+  <!-- CONTRACT -->
+  <section class="screen" id="terms">
+    <article class="paper" id="paper">
+      <p class="letterhead">Ife &amp; Nifemi &middot; Est. 6 October 2021</p>
+      <h2 class="thead">Terms &amp; Conditions of Loving Nifemi</h2>
+      <div class="rule" aria-hidden="true">&#10022;</div>
+      <p class="lede">Please read carefully. Or scroll quickly and tick the box like everyone does.</p>
+
+      <p class="preamble">This Agreement is entered into between <strong>Ife</strong>, hereafter "the Beloved", and <strong>Nifemi</strong>, hereafter "the Devoted", effective from the first day and continuing for as long as there are days. By proceeding, the Beloved agrees, willingly and with full understanding, to the following:</p>
+
+      <section class="clause"><h2><span>1.</span>Snack Rights</h2>
+        <p>The Beloved may take one bite of the Devoted's food at any time, without notice. "One bite" shall be interpreted generously, and only by the Beloved.</p></section>
+
+      <section class="clause"><h2><span>2.</span>The Blanket Clause</h2>
+        <p>In the event of a blanket dispute, the Beloved wins. The Devoted may appeal; the appeal will be denied, lovingly.</p></section>
+
+      <section class="clause"><h2><span>3.</span>Time Definitions</h2>
+        <p>"I'm almost there" shall be understood by both parties to mean "I'm looking for my shoes."</p></section>
+
+      <section class="clause"><h2><span>4.</span>Photo Policy</h2>
+        <p>The Beloved may say "delete that" about any photo. The Devoted reserves the right to pretend he did not hear.</p></section>
+
+      <section class="clause"><h2><span>5.</span>Bad Days</h2>
+        <p>Either party may declare one without explanation. The other shall deliver snacks and ask no questions until invited.</p></section>
+
+      <section class="clause"><h2><span>6.</span>Hangry Immunity</h2>
+        <p>Anything said while hungry is non-binding, and shall be forgiven after food.</p></section>
+
+      <section class="clause"><h2><span>7.</span>Gifting Policy</h2>
+        <p>Gifts may be freely shared between both parties, and are not limited to the tangible. Everyday presence counts: time, patience, a listening ear, and simply showing up are gifts of equal value, and often greater.</p></section>
+
+      <section class="clause"><h2><span>8.</span>Auto-Renewal</h2>
+        <p>This Agreement renews every single day, automatically. There is no cancellation option, and the fine print has been removed.</p></section>
+
+      <section class="clause final"><h2><span>9.</span>The Final Clause</h2>
+        <p>Both parties agree that "I love you" shall be said often, meant always, and never taken for granted.</p></section>
+
+      <div class="rule" aria-hidden="true">&#10022;</div>
+
+      <div class="sign" id="sign">
+        <h3>Signed and agreed</h3>
+
+        <label class="agree">
+          <input type="checkbox" id="agree">
+          <span>I have read this. (I skimmed it.) I agree anyway.</span>
+        </label>
+
+        <div class="sigbox" id="sigbox">
+          <canvas id="pad" aria-label="Signature area. Draw your signature with a finger."></canvas>
+          <span class="x" aria-hidden="true">x</span>
+          <span class="sighint" aria-hidden="true">sign here, Ife</span>
+        </div>
+        <div class="caption">
+          <span>The Beloved (Ife)</span>
+          <span>
+            <button class="linkbtn" id="typeit" hidden>Can't sign? Type it for me</button>
+            <button class="linkbtn" id="clear">Start over</button>
+          </span>
+        </div>
+
+        <div class="second">
+          <div class="pre" aria-hidden="true">Nifemi</div>
+          <div class="caption"><span>The Devoted (Nifemi), already signed, years ago</span></div>
+        </div>
+
+        <div class="seal" id="seal" aria-hidden="true">
+          <div class="seal-in"><b>I &#9829; N</b><small>Sealed</small></div>
+        </div>
+
+        <p class="tmsg" id="tmsg" role="status" aria-live="polite"></p>
+        <button class="seal-btn" id="sealbtn" disabled>Seal the deal</button>
+      </div>
+    </article>
+
+    <div class="after" id="after" hidden>
+      <p>Now that that's out of the way, here are receipts from the past <span id="days">1,826</span> days. Enjoy.</p>
+      <button class="go" id="go">Show me the receipts</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  /* ===== EDIT THESE ===== */
+  const CODE      = "061021";           // 6 Oct 2021 as DDMMYY
+  const START     = { y: 2021, m: 10, d: 6 };
+  const NEXT_PAGE = "year1.html";       // the page opened after the contract is sealed
+  const MUSIC     = "";                 // e.g. "song.mp3" (a short file in the same folder); leave empty for silence
+  /* ====================== */
+
+  const $ = (id) => document.getElementById(id);
+  const gate = $("gate"), loading = $("loading");
+  const dots = [...$("dots").children];
+  const msg = $("msg"), hint = $("hint");
+
+  // days together, counted by calendar day so it is right wherever she opens it
+  function daysTogether() {
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const start = Date.UTC(START.y, START.m - 1, START.d);
+    return Math.max(0, Math.round((today - start) / 86400000));
+  }
+
+  /* ----- gate ----- */
+  const wrong = [
+    "Hmm, not that one.",
+    "Ife. Babe. It's our day.",
+    "Still no. I'm choosing to believe you're teasing me.",
+    "Okay, now I'm hurt. \u{1F494}"
+  ];
+  let entry = "", fails = 0, locked = false;
+
+  function render() {
+    dots.forEach((d, i) => d.classList.toggle("on", i < entry.length));
+  }
+
+  function press(k) {
+    if (locked) return;
+    if (k === "del") { entry = entry.slice(0, -1); render(); return; }
+    if (entry.length >= CODE.length) return;
+    entry += k;
+    render();
+    if (entry.length === CODE.length) check();
+  }
+
+  function check() {
+    if (entry === CODE) { unlock(); return; }
+    locked = true;
+    msg.textContent = wrong[fails % wrong.length];
+    fails++;
+    const box = $("dots");
+    box.classList.remove("shake");
+    void box.offsetWidth;
+    box.classList.add("shake");
+    if (fails >= 2) hint.classList.add("show");
+    setTimeout(() => { entry = ""; render(); locked = false; }, 500);
+  }
+
+  document.querySelectorAll(".key[data-k]").forEach((b) =>
+    b.addEventListener("click", () => press(b.dataset.k))
+  );
+  document.addEventListener("keydown", (e) => {
+    if (!gate.classList.contains("active")) return;
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    if (e.key === "Backspace") press("del");
+  });
+
+  function unlock() {
+    locked = true;
+    msg.textContent = "";
+    if (MUSIC) {
+      const a = new Audio(MUSIC);
+      a.loop = true;
+      a.volume = 0.6;
+      a.play().catch(() => {});
+      window.__music = a;
+    }
+    gate.classList.remove("active");
+    loading.classList.add("active");
+    runLoading();
+  }
+
+  /* ----- loading ----- */
+  const steps = [
+    [0,  "Opening the memory vault..."],
+    [10, "Dusting off Day 1..."],
+    [24, "Locating the first time you laughed at my joke (very generous of you)..."],
+    [38, "Sorting the photos. Most are of you. I'm just in the corner, grateful to be invited."],
+    [52, "Counting every \"I'm almost there\" text. We will not be discussing the results."],
+    [68, "Squeezing the best five years of my life into one page. It's a tight fit..."],
+    [84, "Adding the leap day. A free bonus day with you, courtesy of 2024."],
+    [99, "99%... stuck. There's a lot of us to load."]
+  ];
+
+  function runLoading() {
+    const total = daysTogether();
+    const fill = $("fill"), needle = $("needle");
+    const count = $("count"), pct = $("pct"), line = $("line");
+    const fmt = (n) => Math.round(n).toLocaleString("en");
+
+    function set(p) {
+      fill.style.width = p + "%";
+      needle.style.left = p + "%";
+      pct.textContent = Math.floor(p) + "%";
+      count.textContent = fmt(total * p / 100);
+      for (let i = steps.length - 1; i >= 0; i--) {
+        if (p >= steps[i][0]) { if (line.textContent !== steps[i][1]) line.textContent = steps[i][1]; break; }
+      }
+    }
+
+    const RUN = 8500;               // ms to crawl up to 99%
+    const t0 = performance.now();
+    (function tick(now) {
+      const t = Math.min(1, (now - t0) / RUN);
+      const eased = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      set(99 * eased);
+      if (t < 1) { requestAnimationFrame(tick); return; }
+      set(99);
+      setTimeout(finish, 2400);     // the dramatic stall
+    })(t0);
+
+    function finish() {
+      const t1 = performance.now();
+      (function up(now) {
+        const t = Math.min(1, (now - t1) / 700);
+        set(99 + 1 * t);
+        if (t < 1) { requestAnimationFrame(up); return; }
+        set(100);
+        line.textContent = "Loaded. All " + fmt(total) + " days of it.";
+        $("finale").classList.add("show");
+        $("begin").focus({ preventScroll: true });
+      })(t1);
+    }
+  }
+
+  /* ----- quiz ----- */
+
+  /* answer: the number of the correct option, counting from 0 (first option = 0).
+     answer: null  means every option is correct (a trick question).
+     The answers below are PLACEHOLDERS; swap in the real ones. */
+  const QUIZ = [
+    {
+      q: "Who said \"I love you\" first?",
+      options: ["Nifemi", "Ife", "We said it at the same time, like a Nollywood movie", "Nobody; the jollof said it for us"],
+      answer: 0,
+      right: "Correct! A moment worth framing, and you know it.",
+      wrong: "Wrong, but I admire the confidence. We'll move on with feelings intact."
+    },
+    {
+      q: "Who is more likely to say \"I'm almost there\" while still at home?",
+      options: ["Ife", "Nifemi", "Both of us, shamelessly", "Traffic is the real culprit"],
+      answer: 2,
+      right: "Correct. We are a team of professional time liars.",
+      wrong: "Wrong. The evidence is sitting in our chat history, and it is not on your side."
+    },
+    {
+      q: "What is the unofficial national dish of our relationship?",
+      options: ["Jollof rice", "Suya", "Whatever the other person is eating", "Love, and snacks"],
+      answer: 2,
+      right: "Correct! Sharing is caring; stealing is loving.",
+      wrong: "Wrong. Think about whose plate you last visited uninvited."
+    },
+    {
+      q: "Who gets the bigger share of the blanket?",
+      options: ["Ife, obviously", "Nifemi, in his dreams", "Whoever falls asleep first", "It's a nightly negotiation"],
+      answer: 0,
+      right: "Correct! Nifemi has made peace with this.",
+      wrong: "Wrong. The blanket knows the truth, and the blanket does not lie."
+    },
+    {
+      q: "If our story were a Nollywood movie, what would it be called?",
+      options: ["Ife Nifemi: The Beginning", "Two Fine People, One Remote", "Love Don't Cost a Thing (But Data Does)", "Part 5: Still Not Over Each Other"],
+      answer: null,
+      right: "Every answer is correct. The director is biased, and the director is me."
+    },
+    {
+      q: "On a scale of one to forever, how much does Nifemi love Ife?",
+      options: ["One", "Ten", "Forever", "Beyond forever, no refunds"],
+      answer: null,
+      right: "Trick question. The scale only goes up."
+    }
+  ];
+
+  const VERDICTS = [
+    [6, "Certified Ife. Nifemi's favourite person, and no recount needed."],
+    [5, "A strong pass. The missing mark is a Nifemi problem, not an Ife one."],
+    [3, "Interesting. We will be discussing this over dinner."],
+    [0, "A bold commitment to chaos. You still get the job; the job is loving me."]
+  ];
+
+  const quizEl = $("quiz"), resultEl = $("result");
+  let qi = 0, score = 0, answered = false;
+
+  function drawSteps() {
+    $("steps").innerHTML = QUIZ.map((_, n) =>
+      '<span class="' + (n < qi ? "done" : n === qi ? "now" : "") + '"></span>'
+    ).join("");
+  }
+
+  function showQuestion() {
+    answered = false;
+    const q = QUIZ[qi];
+    $("q").textContent = q.q;
+    $("reply").textContent = "";
+    $("next").hidden = true;
+    $("next").textContent = qi === QUIZ.length - 1 ? "See my score" : "Next";
+    const box = $("opts");
+    box.innerHTML = "";
+    q.options.forEach((text, n) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = text;
+      b.addEventListener("click", () => choose(n));
+      box.appendChild(b);
+    });
+    drawSteps();
+    quizEl.classList.remove("fade");
+    void quizEl.offsetWidth;
+    quizEl.classList.add("fade");
+  }
+
+  function choose(n) {
+    if (answered) return;
+    answered = true;
+    const q = QUIZ[qi];
+    const all = q.answer === null;
+    const ok = all || n === q.answer;
+    if (ok) score++;
+
+    [...$("opts").children].forEach((b, k) => {
+      b.disabled = true;
+      if (all || k === q.answer) {
+        b.classList.add("right");
+        b.textContent = "\u2713 " + b.textContent;
+      } else if (k === n) {
+        b.classList.add("wrong");
+        b.textContent = "\u2717 " + b.textContent;
+      } else {
+        b.classList.add("dim");
+      }
+    });
+
+    $("reply").textContent = ok ? q.right : q.wrong;
+    $("next").hidden = false;
+    $("next").focus({ preventScroll: true });
+  }
+
+  function startQuiz() {
+    loading.classList.remove("active");
+    quizEl.classList.add("active");
+    window.scrollTo(0, 0);
+    showQuestion();
+  }
+
+  $("begin").addEventListener("click", startQuiz);
+
+  $("next").addEventListener("click", () => {
+    qi++;
+    if (qi < QUIZ.length) { showQuestion(); return; }
+    quizEl.classList.remove("active");
+    resultEl.classList.add("active");
+    window.scrollTo(0, 0);
+    $("score").textContent = score + "/" + QUIZ.length;
+    const v = VERDICTS.find((x) => score >= x[0]);
+    $("verdict").textContent = v ? v[1] : "";
+  });
+
+  /* ----- contract ----- */
+  const terms = (function () {
+    const root = document.documentElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pad = $("pad"), sbox = $("sigbox"), ctx = pad.getContext("2d");
+    const agree = $("agree"), sealbtn = $("sealbtn"), tmsg = $("tmsg");
+    let drawing = false, hasInk = false, done = false, last = null;
+
+    function sizePad() {
+      const r = pad.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      pad.width = Math.round(r.width * dpr);
+      pad.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 2.6;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#1B2160";
+      ctx.fillStyle = "#1B2160";
+    }
+    window.addEventListener("resize", () => {
+      if (!hasInk && !done && $("terms").classList.contains("active")) sizePad();
+    });
+
+    function pos(e) {
+      const r = pad.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+    function markInk() { hasInk = true; sbox.classList.add("inked"); }
+
+    pad.addEventListener("pointerdown", (e) => {
+      if (done) return;
+      drawing = true;
+      pad.setPointerCapture(e.pointerId);
+      last = pos(e);
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+      markInk();
+      e.preventDefault();
+    });
+    pad.addEventListener("pointermove", (e) => {
+      if (!drawing || done) return;
+      const p = pos(e);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+      e.preventDefault();
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach((t) =>
+      pad.addEventListener(t, () => { drawing = false; })
+    );
+
+    $("clear").addEventListener("click", () => {
+      if (done) return;
+      ctx.clearRect(0, 0, pad.width, pad.height);
+      hasInk = false;
+      sbox.classList.remove("inked");
+    });
+
+    // safety net if drawing refuses to cooperate on her phone
+    $("typeit").addEventListener("click", () => {
+      if (done) return;
+      ctx.clearRect(0, 0, pad.width, pad.height);
+      const r = pad.getBoundingClientRect();
+      ctx.font = "700 3.2rem Caveat, cursive";
+      ctx.save();
+      ctx.translate(r.width * 0.14, r.height * 0.7);
+      ctx.rotate(-0.04);
+      ctx.fillText("Ife", 0, 0);
+      ctx.restore();
+      markInk();
+      tmsg.textContent = "";
+    });
+
+    agree.addEventListener("change", () => { sealbtn.disabled = !agree.checked; tmsg.textContent = ""; });
+
+    sealbtn.addEventListener("click", () => {
+      if (done) return;
+      if (!hasInk) {
+        tmsg.textContent = "The line is still blank, Ife. Sign it, babe.";
+        sbox.classList.remove("shake");
+        void sbox.offsetWidth;
+        sbox.classList.add("shake");
+        $("typeit").hidden = false;
+        return;
+      }
+      done = true;
+      tmsg.textContent = "";
+      agree.disabled = true;
+      sealbtn.disabled = true;
+      sealbtn.textContent = "Sealed with love";
+      $("clear").hidden = true;
+      $("typeit").hidden = true;
+
+      $("seal").classList.add("stamp");
+      setTimeout(() => $("paper").classList.add("thump"), 300);
+      setTimeout(() => {
+        const after = $("after");
+        after.hidden = false;
+        after.classList.add("show");
+        after.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      }, 1600);
+    });
+
+    $("go").addEventListener("click", () => { window.location.href = NEXT_PAGE; });
+
+    function open() {
+      const n = daysTogether();
+      if (n > 0) $("days").textContent = n.toLocaleString("en");
+      sizePad();
+      if ("IntersectionObserver" in window && !reduce) {
+        root.classList.add("io");
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+        }, { threshold: 0.15 });
+        document.querySelectorAll(".clause").forEach((c) => io.observe(c));
+      }
+    }
+    return { open };
+  })();
+
+  function openTerms() {
+    resultEl.classList.remove("active");
+    document.body.classList.add("paper-mode");
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", "#D9CDB4");
+    $("terms").classList.add("active");
+    window.scrollTo(0, 0);
+    terms.open();
+  }
+
+  $("onward").addEventListener("click", openTerms);
+</script>
+</body>
+</html>
