@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141A4F">
+<title>Nifemi | Year Two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  /* smooth cross-fade between the year pages (supported browsers only, harmless elsewhere) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; }
+
+  :root {
+    --night: #141A4F;
+    --night-deep: #0C1038;
+    --chalk: #F3EEF8;
+    --paper: #FFFDF6;
+    --ink: #2B2420;
+    --pen: #1B2160;
+    --zobo: #C21F4B;
+    --gold: #F4B942;
+    --tape-gold: rgba(244,185,66,.8);
+    --tape-pink: rgba(255,190,210,.75);
+    --display: "Fraunces", Georgia, serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --mono: "Courier Prime", "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; background: var(--night); }
+
+  body {
+    min-height: 100vh;
+    color: var(--chalk);
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* the night sky sits behind everything */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20px 30px,  rgba(243,238,248,.8) 0 1.3px, transparent 2px) 0 0 / 210px 230px,
+      radial-gradient(circle at 90px 120px, rgba(243,238,248,.5) 0 1px,   transparent 1.6px) 0 0 / 170px 190px,
+      radial-gradient(circle at 160px 60px, rgba(244,185,66,.7)  0 1.4px, transparent 2px) 0 0 / 250px 210px,
+      radial-gradient(circle at 60px 190px, rgba(243,238,248,.45) 0 1px,  transparent 1.6px) 0 0 / 190px 250px,
+      radial-gradient(ellipse at 12% 0%, rgba(194,31,75,.34), transparent 55%),
+      radial-gradient(ellipse at 95% 100%, rgba(244,185,66,.12), transparent 50%),
+      linear-gradient(180deg, var(--night) 0%, var(--night-deep) 100%);
+  }
+
+  .book {
+    max-width: 32rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.1rem calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  /* cover */
+  .cover { text-align: center; padding: 1rem 0 1.5rem; }
+  .stamp {
+    display: inline-block;
+    padding: .3rem .8rem;
+    border: 2px solid var(--gold);
+    border-radius: .3rem;
+    color: var(--gold);
+    font: 700 .78rem var(--mono);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    transform: rotate(3deg);
+  }
+  h1 {
+    margin: 1.1rem 0 .2rem;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(3.4rem, 17vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .when { font-style: italic; opacity: .85; }
+  .intro {
+    margin: 1.4rem auto 0;
+    max-width: 17rem;
+    font-family: var(--hand);
+    font-size: 1.7rem;
+    line-height: 1.15;
+    color: var(--gold);
+  }
+  .down { margin-top: .6rem; color: var(--gold); font-size: 1.5rem; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+
+  /* the bouncy trail */
+  .trail { position: relative; padding: 5rem 0 6rem; }
+
+  #route {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .dots { fill: none; stroke-width: 5px; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 13; }
+  .dots.base { stroke: rgba(243,238,248,.3); }
+  .dots.lit  { stroke: var(--gold); filter: drop-shadow(0 0 4px rgba(244,185,66,.55)); }
+  #walker { filter: drop-shadow(0 0 7px rgba(244,185,66,.8)); }
+  #walker .heart {
+    fill: var(--zobo);
+    stroke: var(--chalk);
+    stroke-width: 1.6px;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: beat 1.3s ease-in-out infinite;
+  }
+  @keyframes beat { 50% { transform: scale(1.18); } }
+
+  /* every moment sits in the left or right lane; the trail runs down the other lane */
+  .moment { position: relative; z-index: 1; width: 78%; margin-bottom: 8rem; }
+  .moment:last-of-type { margin-bottom: 0; }
+  .moment.left  { margin-right: auto; }
+  .moment.right { margin-left: auto; }
+
+  .node {
+    position: absolute;
+    top: 3.4rem;
+    z-index: 2;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    background: var(--night);
+    border: 3px solid rgba(243,238,248,.55);
+    transform: translate(-50%, -50%);
+    transition: background .4s, border-color .4s, transform .4s;
+  }
+  .stub {
+    position: absolute;
+    top: 3.4rem;
+    width: 14.1%;
+    border-top: 4px dotted rgba(243,238,248,.3);
+    transition: border-color .4s;
+  }
+  .left  .node { left: calc(100% + 14.1%); }
+  .left  .stub { left: 100%; }
+  .right .node { left: -14.1%; }
+  .right .stub { left: -14.1%; }
+  .moment.reached .node { background: var(--zobo); border-color: var(--gold); transform: translate(-50%, -50%) scale(1.25); }
+  .moment.reached .stub { border-top-color: var(--gold); }
+
+  .js .moment .card, .js .moment .receipt, .js .moment .story {
+    opacity: 0;
+    transform: translateY(18px) rotate(var(--r, 0deg));
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .js .moment .receipt { transform: translateY(18px) rotate(var(--r2, 0deg)); }
+  .js .moment .story   { transform: translateY(18px); }
+  .js .moment.on .card    { opacity: 1; transform: rotate(var(--r, 0deg)); }
+  .js .moment.on .receipt { opacity: 1; transform: rotate(var(--r2, 0deg)); transition-delay: .15s; }
+  .js .moment.on .story   { opacity: 1; transform: none; transition-delay: .3s; }
+
+  /* polaroid */
+  .card {
+    --r: -2deg;
+    --tape: var(--tape-gold);
+    position: relative;
+    width: var(--cw, 100%);
+    padding: .7rem .7rem .35rem;
+    background: #fff;
+    color: var(--pen);
+    box-shadow: 0 2px 0 rgba(0,0,0,.18), 0 18px 34px rgba(4,6,30,.55);
+    transform: rotate(var(--r));
+  }
+  .left  .card { margin-left: auto; }
+  .right .card { margin-right: auto; --r: 2deg; --tape: var(--tape-pink); }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -.7rem;
+    left: 50%;
+    width: 5.2rem;
+    height: 1.5rem;
+    margin-left: -2.6rem;
+    background: var(--tape);
+    transform: rotate(-3deg);
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  }
+  .photo {
+    position: relative;
+    aspect-ratio: var(--ar, 3 / 4);
+    background: #2a2f6b;
+    overflow: hidden;
+  }
+  .photo img, .photo video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--pos, 50% 50%);
+  }
+  .card figcaption {
+    padding: .5rem .2rem .55rem;
+    font-family: var(--hand);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.05;
+    color: var(--pen);
+    text-align: center;
+  }
+
+  /* two polaroids stacked like a pair */
+  .pair .card.b { --r: 2.4deg; --tape: var(--tape-pink); width: 82%; margin: 1.6rem auto 0 0; }
+  .pair .card.a { --cw: 88%; }
+
+  /* video polaroids: tap to play with sound */
+  .play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(12,16,56,.55));
+    color: #fff;
+    cursor: pointer;
+    transition: opacity .3s;
+  }
+  .play i {
+    display: grid;
+    place-items: center;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 50%;
+    background: var(--zobo);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 10px 24px rgba(0,0,0,.45);
+  }
+  .play i::before {
+    content: "";
+    margin-left: .3rem;
+    border-left: 1.1rem solid #fff;
+    border-top: .7rem solid transparent;
+    border-bottom: .7rem solid transparent;
+  }
+  .play span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: .8rem;
+    font: 700 1.4rem var(--hand);
+    text-shadow: 0 1px 6px rgba(0,0,0,.6);
+  }
+  .vid.playing .play { opacity: 0; pointer-events: none; }
+
+  /* receipt stub */
+  .receipt {
+    --r2: 1.4deg;
+    position: relative;
+    width: 92%;
+    margin: -.3rem auto 0 0;
+    padding: .8rem .9rem 1rem;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px dashed rgba(43,36,32,.4);
+    border-bottom: 0;
+    font-family: var(--mono);
+    font-size: .8rem;
+    line-height: 1.5;
+    filter: drop-shadow(0 8px 12px rgba(4,6,30,.45));
+    transform: rotate(var(--r2));
+  }
+  .right .receipt { --r2: -1.4deg; margin: -.3rem 0 0 auto; }
+  .receipt::after {
+    content: "";
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    bottom: -8px;
+    height: 8px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpolygon points='0,0 14,0 7,8' fill='%23FFFDF6'/%3E%3C/svg%3E") repeat-x;
+  }
+  .receipt b {
+    display: block;
+    margin-bottom: .35rem;
+    padding-bottom: .3rem;
+    border-bottom: 1px dashed rgba(43,36,32,.4);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-size: .78rem;
+  }
+  .receipt div { display: flex; justify-content: space-between; gap: .8rem; }
+  .receipt div span:first-child { text-transform: uppercase; opacity: .6; flex: none; }
+  .receipt div span:last-child { text-align: right; }
+
+  .story { margin-top: 1.5rem; padding: 0 .2rem; text-wrap: pretty; }
+
+  /* close */
+  .close { text-align: center; padding-top: 1rem; }
+  .close .big {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.8rem;
+    line-height: 1.2;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .close .hand {
+    margin: .5rem auto 1.6rem;
+    max-width: 19rem;
+    font-family: var(--hand);
+    font-size: 1.8rem;
+    line-height: 1.1;
+    color: var(--gold);
+  }
+  .go {
+    display: inline-block;
+    padding: .95rem 2.3rem;
+    border-radius: 999px;
+    background: var(--zobo);
+    color: #FBF6EA;
+    text-decoration: none;
+    font: 600 1.1rem var(--display);
+    box-shadow: 0 0 0 4px rgba(244,185,66,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .go:active { transform: scale(.96); box-shadow: 0 0 0 7px rgba(244,185,66,.35); }
+  .books { display: flex; justify-content: center; gap: .6rem; margin-top: 2rem; }
+  .books i { width: .75rem; height: .75rem; border-radius: 50%; border: 2px solid rgba(243,238,248,.5); }
+  .books i.done { background: var(--gold); border-color: var(--gold); }
+  .books-note { margin-top: .5rem; font: 500 1.25rem var(--hand); opacity: .8; }
+
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .down, #walker .heart { animation: none; }
+    .js .moment .card, .js .moment .receipt, .js .moment .story { transition: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<main class="book">
+
+  <header class="cover">
+    <span class="stamp">Receipt book &middot; 2 of 5</span>
+    <h1>Year Two</h1>
+    <p class="when">From a very un-random Sunday to our second anniversary</p>
+    <p class="intro">Same receipts, bouncier road. Hold on tight.</p>
+    <p class="down" aria-hidden="true">&#8595;</p>
+  </header>
+
+  <section class="trail" id="trail">
+    <svg id="route" aria-hidden="true" focusable="false">
+      <defs>
+        <mask id="routeMask" maskUnits="userSpaceOnUse">
+          <path id="routeReveal" fill="none" stroke="#fff" stroke-width="40"/>
+        </mask>
+      </defs>
+      <path id="routeBase" class="dots base"/>
+      <path id="routeLit" class="dots lit" mask="url(#routeMask)"/>
+      <g id="walker"><path class="heart" transform="translate(-13 -14) scale(1.1)" d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 2.9 4.5 6.4 4.5c2.1 0 3.9 1.2 5.6 3.3 1.7-2.1 3.5-3.3 5.6-3.3 3.5 0 5.5 3.7 4 7.2C19.5 16.4 12 21 12 21z"/></g>
+    </svg>
+
+    <!-- 001 -->
+    <article class="moment left">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 3 / 5; --cw: 90%; --r: -2deg">
+        <div class="photo"><img src="y2-01.webp" alt="The two of us in a selfie on the way home from church, her pouting a kiss at the camera while I keep a straight face in my denim jacket" width="480" height="800" loading="lazy" decoding="async"></div>
+        <figcaption>Photo 1 of 60+ (we lost count)</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 001</b>
+        <div><span>Item</span><span>One Sunday selfie</span></div>
+        <div><span>Quantity</span><span>60+, and counting</span></div>
+        <div><span>Culprit</span><span>Me. No regrets.</span></div>
+      </div>
+      <p class="story">A random Sunday that was not random at all. We had been to church together, and on the way home I took one look at you and decided the road was now my photo studio. This was photo number one. Sixty-something more followed, and I would happily have taken sixty more. Look at the kiss you blew at the camera, and look at me trying to stay calm about it. I failed, by the way. This one is in the book for the kiss alone.</p>
+    </article>
+
+    <!-- 002 -->
+    <article class="moment right">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 3 / 4; --r: 2deg">
+        <div class="photo"><img src="y2-02.webp" alt="The two of us under the trees on sports day, me tall in a white striped baseball shirt and white sneakers, her tucked against me smiling" width="960" height="1280" loading="lazy" decoding="async"></div>
+        <figcaption>Sports day, final year week</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 002</b>
+        <div><span>Item</span><span>One sports-day cameo</span></div>
+        <div><span>Event</span><span>My final-year week</span></div>
+        <div><span>Invited</span><span>Nobody. She came.</span></div>
+      </div>
+      <p class="story">Final year week, sports day, and there I was in my white baseball shirt and sneakers, feeling like the main character. Then you showed up that morning, just to take pictures with me. Nobody asked you to. You never wait to be asked; you simply turn up for every milestone I have, as if it were written into the contract. (It is. Clause one. Look it up.) And look at us: me standing tall, you tucked under my arm like you were made to fit there.</p>
+    </article>
+
+    <!-- 003 -->
+    <article class="moment left">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 3 / 5; --cw: 90%; --r: -1.6deg">
+        <div class="photo vid" data-video>
+          <video src="y2-03.mp4" poster="y2-03-poster.webp" playsinline preload="metadata" width="480" height="976" aria-label="Video from my sign-out day: she screams that her baby is a graduate"></video>
+          <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+        </div>
+        <figcaption>Sign-out day. Volume up, please.</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 003</b>
+        <div><span>Item</span><span>One T-shirt, signed</span></div>
+        <div><span>Paper</span><span>Written. Survived.</span></div>
+        <div><span>Volume</span><span>Hers. Fully on.</span></div>
+      </div>
+      <p class="story">Sign-out day: the day you write your final paper at the university, and everybody celebrates by signing your white T-shirt with markers until it looks like a very proud notice board. I walked out of that last paper tired and covered in ink, and you screamed straight into the camera: "Yoooo! My baby is a graduateee!" Please turn your volume up for this one. I have watched it more times than I will admit, and it lands the same way every time: that voice, that joy, that we-did-it feeling.</p>
+    </article>
+
+    <!-- 004 -->
+    <article class="moment right">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 4 / 3; --r: 1.8deg">
+        <div class="photo"><img src="y2-04.webp" alt="The two of us in shower caps, smiling widely and making a heart shape with our hands" width="640" height="480" loading="lazy" decoding="async"></div>
+        <figcaption>Till infinity and beyond</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 004</b>
+        <div><span>Item</span><span>Two shower caps</span></div>
+        <div><span>Style</span><span>Zero shame</span></div>
+        <div><span>Message</span><span>Infinity and beyond</span></div>
+      </div>
+      <p class="story">A quick break from the milestones, because we are not all gowns and signatures. Here we are in shower caps, making a heart with our hands and telling the whole world, "Till infinity and beyond." Look at the size of those smiles. Nobody asked us to look this ridiculous, and nobody could stop us from looking this happy. If love has a uniform, I am afraid it is this one.</p>
+    </article>
+
+    <!-- 005 -->
+    <article class="moment left pair">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card a" style="--ar: 3 / 4; --r: -2.2deg">
+        <div class="photo"><img src="y2-05a.webp" alt="In black and white, she reaches up to touch my face while I laugh with my eyes shut, in my convocation gown and cap" width="960" height="1280" loading="lazy" decoding="async"></div>
+        <figcaption>She boops, I laugh</figcaption>
+      </figure>
+      <figure class="card b" style="--ar: 3 / 4">
+        <div class="photo"><img src="y2-05b.webp" alt="In black and white, the two of us grinning side by side, me in my convocation gown and cap, her in a white knit top" width="960" height="1280" loading="lazy" decoding="async"></div>
+        <figcaption>Gown: mine. Smile: ours.</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 005</b>
+        <div><span>Item</span><span>One gown, one cap</span></div>
+        <div><span>Flavour</span><span>Bitter and sweet</span></div>
+        <div><span>Witness</span><span>The best one</span></div>
+      </div>
+      <p class="story">My convocation, in black and white, though you can see the colour in our smiles. It was bitter, because I was about to leave you behind at the university. It was sweet, because I was about to go out and make a name for myself, with you standing right there, proud enough for the both of us. You pressed your hand to my face, I laughed with my eyes shut, and the camera caught it at exactly the right second. If I could keep just one moment of that day, it would be that one.</p>
+    </article>
+
+    <!-- 006 -->
+    <article class="moment right">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 3 / 5; --cw: 90%; --r: 1.6deg">
+        <div class="photo vid" data-video>
+          <video src="y2-06.mp4" poster="y2-06-poster.webp" playsinline preload="metadata" width="480" height="976" aria-label="Video from our second anniversary, on the way to the movies, ending with her twirling for the camera"></video>
+          <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+        </div>
+        <figcaption>Year two: movie date, snack crimes</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 006</b>
+        <div><span>Event</span><span>Our 2nd anniversary</span></div>
+        <div><span>Snacks</span><span>All manner of junk</span></div>
+        <div><span>Diet</span><span>Suspended by consent</span></div>
+      </div>
+      <p class="story">Our second anniversary, and the plan was simple: watch a movie, then eat every kind of junk we could get away with. We got away with a lot. (Nobody has to know how much.) On the way in we stopped for a quick video, and you finished it with a little twirl for the camera, because of course you did. Two years in, and the best part of any movie is still the person sitting next to me.</p>
+    </article>
+
+    <!-- 007 -->
+    <article class="moment left">
+      <span class="node" aria-hidden="true"></span><span class="stub" aria-hidden="true"></span>
+      <figure class="card" style="--ar: 3 / 5; --cw: 90%; --r: -1.8deg">
+        <div class="photo"><img src="y2-07.webp" alt="Her standing in front of the cinema entrance, smiling, in a blue top, jeans and white sneakers" width="480" height="800" loading="lazy" decoding="async"></div>
+        <figcaption>Bonus exhibit: shining</figcaption>
+      </figure>
+      <div class="receipt">
+        <b>Receipt No. 007</b>
+        <div><span>Item</span><span>One unfairly good photo</span></div>
+        <div><span>Reason</span><span>Because why not</span></div>
+        <div><span>Apology</span><span>None offered</span></div>
+      </div>
+      <p class="story">No gown, no signatures, no big milestone to explain this one. Just you in front of the cinema, glowing like the whole day had been arranged around you, and me deciding on the spot that this was going in the book. Because why not? It is my book, and you are the best thing in it.</p>
+    </article>
+  </section>
+
+  <footer class="close">
+    <p class="big">Year Two, closed.</p>
+    <p class="hand">Balance remaining: one graduate, one loudest fan, and one heart in happy overdraft.</p>
+    <a class="go" href="year3.html">On to Year Three</a>
+    <div class="books" role="img" aria-label="Receipt book 2 of 5"><i class="done"></i><i class="done"></i><i></i><i></i><i></i></div>
+    <p class="books-note">2 of 5 receipt books</p>
+  </footer>
+
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var trail = document.getElementById("trail");
+    var svg = document.getElementById("route");
+    var base = document.getElementById("routeBase");
+    var lit = document.getElementById("routeLit");
+    var reveal = document.getElementById("routeReveal");
+    var mask = document.getElementById("routeMask");
+    var walker = document.getElementById("walker");
+    var moments = [].slice.call(document.querySelectorAll(".moment"));
+
+    /* reveal each moment as she reaches it */
+    if ("IntersectionObserver" in window) {
+      root.classList.add("js");
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+      moments.forEach(function (m) { io.observe(m); });
+    } else {
+      moments.forEach(function (m) { m.classList.add("on"); });
+    }
+
+    /* the bouncy path: it swoops from lane to lane in the gaps between moments */
+    var L = 0, H = 0, ys = [], nodeLens = [];
+    var cur = 0, target = 0, vel = 0, running = false;
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    function build() {
+      var tb = trail.getBoundingClientRect();
+      var W = tb.width;
+      H = trail.offsetHeight;
+      var rem = parseFloat(getComputedStyle(root).fontSize) || 16;
+
+      svg.setAttribute("width", W);
+      svg.setAttribute("height", H);
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      mask.setAttribute("x", -40); mask.setAttribute("y", -40);
+      mask.setAttribute("width", W + 80); mask.setAttribute("height", H + 80);
+
+      var d = "M" + (W / 2) + " 0";
+      var prev = { x: W / 2, y: 0 };
+      var pts = [];
+
+      moments.forEach(function (m, i) {
+        var n = m.querySelector(".node").getBoundingClientRect();
+        var mb = m.getBoundingClientRect();
+        var p = { x: n.left + n.width / 2 - tb.left, y: n.top + n.height / 2 - tb.top };
+        var q = { x: p.x, y: mb.bottom - tb.top - rem };
+        pts.push(p);
+
+        /* swoop across from the previous lane (vertical tangents, so it reads as a bouncy diagonal) */
+        var k = (p.y - prev.y) * 0.55;
+        d += " C " + prev.x + " " + (prev.y + k) + " " + p.x + " " + (p.y - k) + " " + p.x + " " + p.y;
+
+        /* gentle wobble down the lane beside the story */
+        var a = (i % 2 ? -1 : 1) * Math.min(18, W * 0.045);
+        var s = (q.y - p.y) / 3;
+        d += " C " + (p.x + a) + " " + (p.y + s) + " " + (q.x + a) + " " + (q.y - s) + " " + q.x + " " + q.y;
+        prev = q;
+      });
+
+      /* last swoop back to the middle, ready for the closing button */
+      var e = { x: W / 2, y: H };
+      var k2 = (e.y - prev.y) * 0.55;
+      d += " C " + prev.x + " " + (prev.y + k2) + " " + e.x + " " + (e.y - k2) + " " + e.x + " " + e.y;
+
+      base.setAttribute("d", d);
+      lit.setAttribute("d", d);
+      reveal.setAttribute("d", d);
+      L = base.getTotalLength();
+      reveal.style.strokeDasharray = L + " " + L;
+
+      /* y -> length lookup (the path only ever moves downward) */
+      var N = Math.max(300, Math.round(L / 5));
+      ys = [];
+      for (var i = 0; i <= N; i++) { ys.push(base.getPointAtLength(L * i / N).y); }
+      nodeLens = pts.map(function (p) { return lenForY(p.y); });
+
+      target = computeTarget();
+      cur = target; vel = 0;
+      apply(cur);
+    }
+
+    function lenForY(y) {
+      var lo = 0, hi = ys.length - 1;
+      while (lo < hi) {
+        var mid = (lo + hi) >> 1;
+        if (ys[mid] < y) lo = mid + 1; else hi = mid;
+      }
+      return L * lo / (ys.length - 1);
+    }
+
+    function computeTarget() {
+      if (!L) return 0;
+      var y = window.innerHeight * 0.6 - trail.getBoundingClientRect().top;
+      return clamp(lenForY(clamp(y, 0, H)) / L, 0, 1);
+    }
+
+    function apply(p) {
+      if (!L) return;
+      var len = clamp(p, 0, 1) * L;
+      var pt = base.getPointAtLength(len);
+      walker.setAttribute("transform", "translate(" + pt.x + " " + pt.y + ")");
+      reveal.style.strokeDashoffset = L - len;
+      moments.forEach(function (m, i) {
+        m.classList.toggle("reached", len >= nodeLens[i] - 1);
+      });
+    }
+
+    /* the heart follows your scroll with a little spring, so it bounces along the trail */
+    function tick() {
+      var diff = target - cur;
+      vel = (vel + diff * 0.09) * 0.78;
+      cur = clamp(cur + vel, 0, 1);
+      apply(cur);
+      if (Math.abs(diff) < 0.0004 && Math.abs(vel) < 0.0004) {
+        cur = target; apply(cur); running = false; return;
+      }
+      requestAnimationFrame(tick);
+    }
+    function onScroll() {
+      target = computeTarget();
+      if (reduce) { cur = target; apply(cur); return; }
+      if (!running) { running = true; requestAnimationFrame(tick); }
+    }
+
+    var rebuildTimer;
+    function scheduleBuild() { clearTimeout(rebuildTimer); rebuildTimer = setTimeout(build, 120); }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", scheduleBuild);
+    window.addEventListener("load", build);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(build); }
+    if ("ResizeObserver" in window) { new ResizeObserver(scheduleBuild).observe(trail); }
+    build();
+
+    /* videos: tap to play with sound, one at a time, paused when scrolled away */
+    var vids = [].slice.call(document.querySelectorAll("[data-video]"));
+    vids.forEach(function (box) {
+      var v = box.querySelector("video");
+      var btn = box.querySelector(".play");
+
+      function start() {
+        vids.forEach(function (o) { var ov = o.querySelector("video"); if (ov !== v && !ov.paused) ov.pause(); });
+        v.muted = false;
+        var pr = v.play();
+        if (pr && pr.catch) { pr.catch(function () { v.muted = true; v.play(); }); }
+      }
+      btn.addEventListener("click", start);
+      v.addEventListener("click", function () { if (v.paused) { start(); } else { v.pause(); } });
+      v.addEventListener("play", function () { box.classList.add("playing"); });
+      v.addEventListener("pause", function () { box.classList.remove("playing"); });
+      v.addEventListener("ended", function () { box.classList.remove("playing"); v.currentTime = 0; });
+
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (!e.isIntersecting && !v.paused) v.pause(); });
+        }, { threshold: 0.2 }).observe(box);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
