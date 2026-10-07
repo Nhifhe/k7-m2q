@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1B1646">
+<title>Nifemi | Year One</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  /* smooth cross-fade between the year pages (supported browsers only, harmless elsewhere) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; }
+
+  :root {
+    --ink: #2B2420;
+    --pen: #1B2160;
+    --zobo: #C21F4B;
+    --gold: #F4B942;
+    --chalk: #F3EEF8;
+    --paper: #FFF9EC;
+    --twine: #C9A36B;
+    --display: "Fraunces", Georgia, serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --mono: "Courier Prime", "Courier New", monospace;
+    --p: 0;
+    --day: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; background: #1B1646; }
+
+  body {
+    min-height: 100vh;
+    color: var(--chalk);
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* the sky: pre-dawn at the top of the page, golden morning at the bottom */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    overflow: hidden;
+    background: linear-gradient(180deg, #1B1646 0%, #4E2468 34%, #B63F66 62%, #F0864C 84%, #FFC56B 100%);
+  }
+  .sky::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #8EC5EE 0%, #CDE3F1 30%, #FFE7BE 68%, #FFD07A 100%);
+    opacity: var(--day);
+  }
+  .sun {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 130vmax;
+    height: 130vmax;
+    max-width: 150vw;
+    max-height: 150vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFF6CF 0 9%, #FFD36B 17%, rgba(255,150,70,.5) 34%, rgba(255,120,80,0) 62%);
+    mix-blend-mode: screen;
+    transform: translate(-50%, calc(50% + 36vh - var(--p) * 74vh));
+  }
+
+  .petals { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .petal {
+    position: absolute;
+    top: 0;
+    left: var(--x);
+    width: var(--s);
+    height: calc(var(--s) * 1.45);
+    background: linear-gradient(135deg, #E23A64, #C21F4B 60%, #8F1236);
+    border-radius: 85% 0 85% 0;
+    opacity: .6;
+    animation: fall var(--d) linear var(--delay) infinite;
+  }
+  @keyframes fall {
+    0%   { transform: translate3d(0, -12vh, 0) rotate(0deg); }
+    50%  { transform: translate3d(calc(var(--dx) * .5), 55vh, 0) rotate(calc(var(--rot) * .5)); }
+    100% { transform: translate3d(var(--dx), 112vh, 0) rotate(var(--rot)); }
+  }
+
+  .book {
+    max-width: 32rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.1rem calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  /* cover */
+  .cover { text-align: center; padding: 1.5rem 0 3rem; }
+  .stamp {
+    display: inline-block;
+    padding: .3rem .8rem;
+    border: 2px solid var(--gold);
+    border-radius: .3rem;
+    color: var(--gold);
+    font: 700 .78rem var(--mono);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    transform: rotate(-3deg);
+  }
+  h1 {
+    margin: 1.1rem 0 .2rem;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(3.4rem, 17vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .when { font-style: italic; opacity: .9; }
+  .intro {
+    margin: 1.4rem auto 0;
+    max-width: 17rem;
+    font-family: var(--hand);
+    font-size: 1.75rem;
+    line-height: 1.15;
+    color: var(--gold);
+  }
+  .down { margin-top: .6rem; color: var(--gold); font-size: 1.5rem; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+
+  /* the clothesline */
+  .moment { position: relative; padding-top: 1.6rem; margin-bottom: 4.6rem; }
+  .moment:last-of-type { margin-bottom: 2rem; }
+
+  .rope {
+    position: absolute;
+    top: 0;
+    left: -1.1rem;
+    right: -1.1rem;
+    width: calc(100% + 2.2rem);
+    height: 2.4rem;
+    overflow: visible;
+    z-index: 0;
+    filter: drop-shadow(0 2px 2px rgba(20,8,40,.35));
+  }
+  .rope path { fill: none; stroke: var(--twine); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+  .hang { position: relative; z-index: 1; width: var(--cw, 92%); }
+  .moment:nth-of-type(even) .hang { margin-left: auto; }
+
+  .js .hang {
+    opacity: 0;
+    transform: rotate(var(--in, 7deg));
+    transform-origin: 50% -1.6rem;
+    transition: opacity .6s ease, transform 1.2s cubic-bezier(.2, 1.5, .4, 1);
+  }
+  .js .moment:nth-of-type(even) .hang { --in: -7deg; }
+  .js .moment.on .hang { opacity: 1; transform: none; }
+
+  /* polaroid, swaying gently on its pegs */
+  .card {
+    --r: -1.4deg;
+    position: relative;
+    padding: .7rem .7rem .35rem;
+    background: #fff;
+    color: var(--pen);
+    box-shadow: 0 2px 0 rgba(0,0,0,.14), 0 18px 32px rgba(30,10,50,.4);
+    transform-origin: 50% -1rem;
+    animation: sway var(--sw, 5.6s) ease-in-out infinite alternate;
+  }
+  .moment:nth-of-type(even) .card { --r: 1.4deg; --sw: 6.4s; }
+  @keyframes sway {
+    from { transform: rotate(calc(var(--r) - 1.2deg)); }
+    to   { transform: rotate(calc(var(--r) + 1.2deg)); }
+  }
+  .pin {
+    position: absolute;
+    top: -1.35rem;
+    width: .72rem;
+    height: 2.1rem;
+    border-radius: .25rem;
+    background: linear-gradient(90deg, #E2B070, #B97F3E);
+    box-shadow: 0 2px 3px rgba(0,0,0,.35);
+  }
+  .pin::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: .85rem;
+    width: 1px;
+    height: .5rem;
+    background: rgba(60,30,10,.55);
+  }
+  .pin.l { left: 16%; }
+  .pin.r { right: 16%; }
+
+  .photo {
+    position: relative;
+    aspect-ratio: var(--ar, 3 / 4);
+    background: #3a2a5a;
+    overflow: hidden;
+  }
+  .photo img, .photo video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--pos, 50% 50%);
+  }
+  .card figcaption {
+    padding: .5rem .2rem .55rem;
+    font-family: var(--hand);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.05;
+    color: var(--pen);
+    text-align: center;
+  }
+
+  /* video polaroid: tap to play with sound */
+  .play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(27,22,70,.6));
+    color: #fff;
+    cursor: pointer;
+    transition: opacity .3s;
+  }
+  .play i {
+    display: grid;
+    place-items: center;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 50%;
+    background: var(--zobo);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 10px 24px rgba(0,0,0,.45);
+  }
+  .play i::before {
+    content: "";
+    margin-left: .3rem;
+    border-left: 1.1rem solid #fff;
+    border-top: .7rem solid transparent;
+    border-bottom: .7rem solid transparent;
+  }
+  .play span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: .8rem;
+    font: 700 1.4rem var(--hand);
+    text-shadow: 0 1px 6px rgba(0,0,0,.6);
+  }
+  .vid.playing .play { opacity: 0; pointer-events: none; }
+
+  /* receipt as a ticket stub with notched sides */
+  .ticket {
+    --r2: 1.4deg;
+    position: relative;
+    z-index: 1;
+    width: 86%;
+    margin: -.5rem 0 0 auto;
+    filter: drop-shadow(0 8px 10px rgba(30,10,50,.38));
+    transform: rotate(var(--r2));
+  }
+  .moment:nth-of-type(even) .ticket { --r2: -1.4deg; margin: -.5rem auto 0 0; }
+  .ticket-in {
+    --n: .55rem;
+    padding: .85rem 1.25rem .95rem;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: .8rem;
+    line-height: 1.5;
+    -webkit-mask:
+      radial-gradient(circle at 0 50%, transparent var(--n), #000 calc(var(--n) + .5px)) left / 52% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent var(--n), #000 calc(var(--n) + .5px)) right / 52% 100% no-repeat;
+    mask:
+      radial-gradient(circle at 0 50%, transparent var(--n), #000 calc(var(--n) + .5px)) left / 52% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent var(--n), #000 calc(var(--n) + .5px)) right / 52% 100% no-repeat;
+  }
+  .ticket b {
+    display: block;
+    margin-bottom: .35rem;
+    padding-bottom: .3rem;
+    border-bottom: 1px dashed rgba(43,36,32,.45);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-size: .78rem;
+  }
+  .ticket div { display: flex; justify-content: space-between; gap: .8rem; }
+  .ticket div span:first-child { text-transform: uppercase; opacity: .6; flex: none; }
+  .ticket div span:last-child { text-align: right; }
+
+  /* the story sits on a warm note card so it reads on any sky */
+  .story {
+    position: relative;
+    z-index: 1;
+    margin-top: 1.3rem;
+    padding: 1rem 1.15rem;
+    background: rgba(255, 249, 236, .94);
+    color: var(--ink);
+    border-radius: .9rem;
+    box-shadow: 0 10px 22px rgba(30,10,50,.25);
+    text-wrap: pretty;
+  }
+
+  .js .ticket, .js .story { opacity: 0; transform: translateY(18px) rotate(var(--r2, 0deg)); transition: opacity .7s ease .25s, transform .7s ease .25s; }
+  .js .story { transform: translateY(18px); transition-delay: .4s; }
+  .js .moment.on .ticket { opacity: 1; transform: rotate(var(--r2, 0deg)); }
+  .js .moment.on .story  { opacity: 1; transform: none; }
+
+  /* close */
+  .close { text-align: center; padding-top: 1.5rem; color: var(--ink); }
+  .close .big {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.9rem;
+    line-height: 1.2;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .close .hand {
+    margin: .5rem auto 1.6rem;
+    max-width: 19rem;
+    font-family: var(--hand);
+    font-size: 1.85rem;
+    line-height: 1.1;
+    color: var(--pen);
+  }
+  .go {
+    display: inline-block;
+    padding: .95rem 2.3rem;
+    border-radius: 999px;
+    background: var(--zobo);
+    color: #FBF6EA;
+    text-decoration: none;
+    font: 600 1.1rem var(--display);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.55);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .go:active { transform: scale(.96); box-shadow: 0 0 0 7px rgba(255,255,255,.55); }
+  .books { display: flex; justify-content: center; gap: .6rem; margin-top: 2rem; }
+  .books i { width: .75rem; height: .75rem; border-radius: 50%; border: 2px solid rgba(43,36,32,.5); }
+  .books i.done { background: var(--zobo); border-color: var(--zobo); }
+  .books-note { margin-top: .5rem; font: 500 1.25rem var(--hand); color: var(--pen); }
+
+  :focus-visible { outline: 3px solid var(--zobo); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .down, .card, .petal { animation: none; }
+    .petals { display: none; }
+    .card { transform: rotate(var(--r)); }
+    .js .hang, .js .ticket, .js .story { transition: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><div class="sun"></div></div>
+<div class="petals" id="petals" aria-hidden="true"></div>
+
+<main class="book">
+
+  <header class="cover">
+    <span class="stamp">Receipt book &middot; 1 of 5</span>
+    <h1>Year One</h1>
+    <p class="when">From one stolen photo to one priceless laugh</p>
+    <p class="intro">Every sunrise starts with a first light. This is ours.</p>
+    <p class="down" aria-hidden="true">&#8595;</p>
+  </header>
+
+  <section class="trail" id="trail">
+
+    <!-- 001 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-01.webp" alt="Ife looking off to the side, caught in a quiet moment" width="480" height="640" loading="lazy" decoding="async"></div>
+          <figcaption>Exhibit A: the sneaky one</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 001</b>
+        <div><span>Item</span><span>One stolen photo</span></div>
+        <div><span>Price</span><span>Priceless</span></div>
+        <div><span>Status</span><span>Never deleted</span></div>
+      </div></div>
+      <p class="story">We were still getting to know each other, and you looked so pretty that my hands made the decision before my brain could. You never noticed. I committed the crime, I kept the evidence, and I would do it all over again.</p>
+    </article>
+
+    <!-- 002 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-02.webp" alt="The two of us standing together in front of our university auditorium" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>Practising being a couple (unofficially)</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 002</b>
+        <div><span>Item</span><span>Our first photo together</span></div>
+        <div><span>Venue</span><span>The university auditorium</span></div>
+        <div><span>Note</span><span>One week before I asked</span></div>
+      </div></div>
+      <p class="story">A school event, a crowd of strangers, and one small moment that belonged only to us. Look at that bear on my shirt; even he knew what was coming. About a week later, I finally found the courage to ask you to be mine.</p>
+    </article>
+
+    <!-- 003 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-03.webp" alt="Both of us smiling in matriculation gowns, in black and white" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>Matriculating twice for love</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 003</b>
+        <div><span>Item</span><span>One matric gown</span></div>
+        <div><span>Needed</span><span>Technically, no</span></div>
+        <div><span>Worn</span><span>Anyway</span></div>
+      </div></div>
+      <p class="story">You had already said yes by then. It was your matriculation, and I had done mine already, but I put on a gown anyway because I was not about to let you walk into that milestone without me. You held your tiny fan like a queen; I held on to you and grinned like I had personally graduated.</p>
+    </article>
+
+    <!-- 004 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-04.webp" alt="A selfie of the two of us at a friend's place, with her necklace visible" width="480" height="640" loading="lazy" decoding="async"></div>
+          <figcaption>My heart, hanging right there</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 004</b>
+        <div><span>Item</span><span>One heart-bead necklace</span></div>
+        <div><span>Price</span><span>My whole heart</span></div>
+        <div><span>Status</span><span>Still worn, everywhere</span></div>
+      </div></div>
+      <p class="story">A little chain, tucked inside a big bead shaped like a heart. I gave it to you as my heart, and you wore it to show the world. Look closely at this photo from a friend's place; there it is, resting against you, exactly where I meant it to be. You have worn it ever since, and every time I see it, I remember I did something right.</p>
+    </article>
+
+    <!-- 005 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-05.webp" alt="A selfie of the two of us at Freedom Park, Lagos, with a red drink raised in her hand" width="480" height="640" loading="lazy" decoding="async"></div>
+          <figcaption>Cheers to a new year, and to us</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 005</b>
+        <div><span>Item</span><span>One brand-new year</span></div>
+        <div><span>Venue</span><span>Freedom Park, Lagos</span></div>
+        <div><span>Date</span><span>Around 6 January</span></div>
+      </div></div>
+      <p class="story">Our first outing together, just after the new year began. We went out to celebrate it: a new year, and quietly, a new year of us. I took the selfie; you hid behind a red drink raised like a toast, grinning as if the whole year had been your idea. It was a very good year to start.</p>
+    </article>
+
+    <!-- 006 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-06.webp" alt="The two of us standing on a path under a huge tree, both dressed in navy blue" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>Telepathy, but make it fashion</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 006</b>
+        <div><span>Item</span><span>Two outfits, one colour</span></div>
+        <div><span>Planning</span><span>None whatsoever</span></div>
+        <div><span>Method</span><span>Pure telepathy</span></div>
+      </div></div>
+      <p class="story">A random day at school, with no texts, no plans and no "wear blue" memo. We simply turned up in the same navy, under the biggest tree in sight, like a colour show nobody had scheduled. Some couples need a group chat to coordinate; we apparently only needed vibes.</p>
+    </article>
+
+    <!-- 007 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-07.webp" alt="The two of us sitting close on a brown sofa in front of a wall of painted roses, both in black with red accents" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>Roses, red accents, same code</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 007</b>
+        <div><span>Item</span><span>Two tickets, one Valentine</span></div>
+        <div><span>Film</span><span>Marry Me (2022)</span></div>
+        <div><span>Dress code</span><span>Black and red</span></div>
+      </div></div>
+      <p class="story">Our first Valentine's together, and yes, we tried to match again: black with a splash of red, in front of a wall of roses that looked like it was paid to be romantic. The movie was Marry Me, fresh out that February, starring Jennifer Lopez and some guy. I could not tell you his name; I was busy sitting next to you.</p>
+    </article>
+
+    <!-- 008 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-08.webp" alt="In black and white, the two of us in matching ankara, close up and looking into each other's eyes, both smiling" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>For the museum of space</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 008</b>
+        <div><span>Item</span><span>One look, held</span></div>
+        <div><span>Venue</span><span>A celebration of life</span></div>
+        <div><span>Curator</span><span>The universe, much later</span></div>
+      </div></div>
+      <p class="story">We wore the same ankara to celebrate the life of a friend's grandmother, and somewhere in the middle of it, the camera caught us looking at each other. Monochrome, up close, a sharp glint in both our eyes and a huge smile on both our faces: love, admiration and everything in between. Long after the last human is gone, I imagine this hanging in a museum somewhere in space, next to a Basquiat, with a small plaque: "Proof that people once loved like this."</p>
+    </article>
+
+    <!-- 009 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang" style="--cw: 84%">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo vid" style="--ar: 3 / 5" data-video>
+            <video src="y1-09.mp4" poster="y1-09-poster.webp" playsinline preload="metadata" width="480" height="976" aria-label="A short video of the two of us at our first concert, with sparkling lights flickering over the camera"></video>
+            <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+          </div>
+          <figcaption>Our first concert: sound on</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 009</b>
+        <div><span>Item</span><span>One concert, two fans</span></div>
+        <div><span>Artist</span><span>Davido, her favourite</span></div>
+        <div><span>Volume</span><span>Fully on</span></div>
+      </div></div>
+      <p class="story">Our first concert together, and the artist was your favourite, Davido. I am sure the music was great, but the real show was you. This quick clip is us in the crowd with the lights flickering over our faces, and look at your neck: that heart necklace, right there at your favourite artist's show. Tap play, turn it up, and imagine the rest.</p>
+    </article>
+
+    <!-- 010 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo" style="--ar: 4 / 3"><img src="y1-10.webp" alt="A selfie of the two of us at the restaurant, both smiling a little, while a surprise waited back at her hostel" width="640" height="480" loading="lazy" decoding="async"></div>
+          <figcaption>Operation: keep her busy</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 010</b>
+        <div><span>Item</span><span>One pizza, one ice cream</span></div>
+        <div><span>Hidden item</span><span>One surprise party</span></div>
+        <div><span>Accomplices</span><span>All her friends</span></div>
+      </div></div>
+      <p class="story">Our first birthdays together; yours lands four days after mine, in the same August, so we get the whole month. I took you out for pizza and ice cream with a very straight face and a very secret plan. While we ate, your friends were turning your hostel room into a party, with cakes, gifts and a Happy Birthday banner. We walked back into a dark room, you flipped the light switch, and a room full of people shouted "Surprise!" I will remember your face for the rest of my life.</p>
+    </article>
+
+    <!-- 011 -->
+    <article class="moment">
+      <svg class="rope" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q50 30 100 6"/></svg>
+      <div class="hang">
+        <figure class="card">
+          <span class="pin l"></span><span class="pin r"></span>
+          <div class="photo"><img src="y1-11.webp" alt="In black and white, her sitting by a tree and bench, laughing with joy" width="800" height="1067" loading="lazy" decoding="async"></div>
+          <figcaption>Priceless (no further questions)</figcaption>
+        </figure>
+      </div>
+      <div class="ticket"><div class="ticket-in">
+        <b>Receipt No. 011</b>
+        <div><span>Item</span><span>One laugh</span></div>
+        <div><span>Price</span><span>Priceless</span></div>
+        <div><span>Photographer</span><span>Me, walking towards you</span></div>
+      </div></div>
+      <p class="story">No occasion, no outfit, no plan. Just a random day, me walking towards you, and you already laughing before I got close. I took this photo knowing it would be one of the most valuable things I would ever own. It is my book, so I decide what goes in it, and this one goes last, on purpose. Whenever I need to remember why I love you, I only need to look at this: one person laughing, simply because the other one showed up.</p>
+    </article>
+
+  </section>
+
+  <footer class="close">
+    <p class="big">Year One, closed.</p>
+    <p class="hand">Balance remaining: one very full heart, and a laugh worth keeping.</p>
+    <a class="go" href="year2.html">On to Year Two</a>
+    <div class="books" role="img" aria-label="Receipt book 1 of 5"><i class="done"></i><i></i><i></i><i></i><i></i></div>
+    <p class="books-note">1 of 5 receipt books</p>
+  </footer>
+
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var moments = [].slice.call(document.querySelectorAll(".moment"));
+
+    /* each photo swings onto its peg as she reaches it */
+    if ("IntersectionObserver" in window) {
+      root.classList.add("js");
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+      moments.forEach(function (m) { io.observe(m); });
+    } else {
+      moments.forEach(function (m) { m.classList.add("on"); });
+    }
+
+    /* the sun rises, and the sky warms from pre-dawn to golden morning, as she scrolls */
+    var ticking = false;
+    function sky() {
+      ticking = false;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.max(0, Math.min(1, window.scrollY / max)) : 0;
+      var d = Math.max(0, Math.min(1, (p - 0.1) / 0.75));
+      root.style.setProperty("--p", p.toFixed(4));
+      root.style.setProperty("--day", d.toFixed(4));
+    }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(sky); } }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("load", sky);
+    sky();
+
+    /* a few hibiscus (zobo) petals drifting down */
+    if (!reduce) {
+      var box = document.getElementById("petals");
+      for (var i = 0; i < 14; i++) {
+        var s = document.createElement("span");
+        s.className = "petal";
+        s.style.setProperty("--x", (Math.random() * 100).toFixed(1) + "%");
+        s.style.setProperty("--s", (9 + Math.random() * 10).toFixed(1) + "px");
+        s.style.setProperty("--d", (15 + Math.random() * 14).toFixed(1) + "s");
+        s.style.setProperty("--delay", (-Math.random() * 28).toFixed(1) + "s");
+        s.style.setProperty("--dx", ((Math.random() - 0.5) * 160).toFixed(0) + "px");
+        s.style.setProperty("--rot", ((Math.random() < 0.5 ? -1 : 1) * (240 + Math.random() * 360)).toFixed(0) + "deg");
+        box.appendChild(s);
+      }
+    }
+
+    /* videos: tap to play with sound, one at a time, paused when scrolled away */
+    var vids = [].slice.call(document.querySelectorAll("[data-video]"));
+    vids.forEach(function (boxEl) {
+      var v = boxEl.querySelector("video");
+      var btn = boxEl.querySelector(".play");
+
+      function start() {
+        vids.forEach(function (o) { var ov = o.querySelector("video"); if (ov !== v && !ov.paused) ov.pause(); });
+        v.muted = false;
+        var pr = v.play();
+        if (pr && pr.catch) { pr.catch(function () { v.muted = true; v.play(); }); }
+      }
+      btn.addEventListener("click", start);
+      v.addEventListener("click", function () { if (v.paused) { start(); } else { v.pause(); } });
+      v.addEventListener("play", function () { boxEl.classList.add("playing"); });
+      v.addEventListener("pause", function () { boxEl.classList.remove("playing"); });
+      v.addEventListener("ended", function () { boxEl.classList.remove("playing"); v.currentTime = 0; });
+
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (!e.isIntersecting && !v.paused) v.pause(); });
+        }, { threshold: 0.2 }).observe(boxEl);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
