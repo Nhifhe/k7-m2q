@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#C9A57B">
+<title>Nifemi | Year Three</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  /* smooth cross-fade between the year pages (supported browsers only, harmless elsewhere) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; }
+
+  :root {
+    --n: 13;
+    --kraft: #C9A57B;
+    --ink: #2A1B12;
+    --ivory: #FFFDF6;
+    --paper: #FBF4E4;
+    --red: #B8402B;
+    --blue: #24508A;
+    --teal: #2F6F73;
+    --air-red: #D0392B;
+    --air-blue: #1F4F96;
+    --display: "Fraunces", Georgia, serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --mono: "Courier Prime", "Courier New", monospace;
+    --routeH: 110px;
+    --navH: 58px;
+    --barH: 34px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--kraft); }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    line-height: 1.55;
+    overscroll-behavior: none;
+  }
+
+  /* the whole thing is one worn kraft-paper parcel */
+  .stage {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background:
+      radial-gradient(ellipse 85% 55% at 50% 40%, rgba(255,238,208,.55), transparent 72%),
+      radial-gradient(ellipse 130% 70% at 50% 118%, rgba(70,35,12,.5), transparent 65%),
+      radial-gradient(ellipse 130% 70% at 50% -18%, rgba(70,35,12,.32), transparent 65%),
+      var(--kraft);
+  }
+  .grain {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .2 0 0 0 0 .1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .stage > *:not(.grain) { position: relative; z-index: 1; }
+
+  /* airmail border stripes */
+  .stripe {
+    flex: none;
+    height: 8px;
+    background: repeating-linear-gradient(135deg, var(--air-red) 0 14px, var(--paper) 14px 22px, var(--air-blue) 22px 36px, var(--paper) 36px 44px);
+  }
+
+  .bar {
+    flex: none;
+    height: var(--barH);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    font: 700 .68rem var(--mono);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(42,27,18,.78);
+  }
+
+  .wrap { position: relative; flex: 1; min-height: 0; }
+  .scroller {
+    position: absolute;
+    inset: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    outline: none;
+  }
+  .scroller::-webkit-scrollbar { display: none; }
+
+  .track {
+    position: relative;
+    display: flex;
+    width: calc(var(--n) * 100%);
+    height: 100%;
+    padding-top: var(--routeH);
+  }
+
+  /* the dotted flight route */
+  .route { position: absolute; left: 0; top: 0; z-index: 2; overflow: visible; pointer-events: none; }
+  .route path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0 13; stroke-width: 4.5px; }
+  #routeBase { stroke: rgba(42,27,18,.42); }
+  #routeLit  { stroke: var(--red); }
+
+  .pin {
+    position: absolute;
+    top: 65px;
+    z-index: 2;
+    left: calc((var(--i) + .5) * (100% / var(--n)));
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    pointer-events: none;
+  }
+  .pin i {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 3px solid rgba(42,27,18,.7);
+    transition: background .35s, border-color .35s, transform .35s;
+  }
+  .pin b {
+    font: 700 .6rem var(--mono);
+    letter-spacing: .14em;
+    color: rgba(42,27,18,.7);
+    transition: color .35s;
+  }
+  .pin.reached i { background: var(--red); border-color: var(--paper); transform: scale(1.2); box-shadow: 0 0 0 2px var(--red); }
+  .pin.reached b { color: var(--red); }
+
+  /* the paper plane */
+  .plane {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 4;
+    width: 40px;
+    height: 30px;
+    margin: -15px 0 0 -20px;
+    pointer-events: none;
+    will-change: transform;
+    visibility: hidden;
+  }
+  .plane svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 5px 3px rgba(60,30,10,.35)); animation: bob 2.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-3px); } }
+
+  /* pages */
+  .page {
+    flex: 0 0 calc(100% / var(--n));
+    display: flex;
+    padding: .4rem 1.1rem 1.4rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .page::-webkit-scrollbar { display: none; }
+  .stop {
+    margin: auto;
+    width: 100%;
+    max-width: 30rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .stop.center { text-align: center; gap: .8rem; }
+  .side { width: 100%; display: flex; flex-direction: column; align-items: center; gap: .95rem; }
+
+  /* things slide in when you land on a page */
+  .js .rise {
+    opacity: 0;
+    transform: translateX(28px);
+    transition: opacity .6s ease, transform .6s ease;
+    transition-delay: calc(var(--i, 0) * .12s + .08s);
+  }
+  .js .page.in .rise { opacity: 1; transform: none; }
+
+  /* cover */
+  .par {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: .3rem .9rem .35rem;
+    background: var(--paper);
+    border: 4px solid transparent;
+    border-image: repeating-linear-gradient(135deg, var(--air-red) 0 8px, var(--paper) 8px 14px, var(--air-blue) 14px 22px, var(--paper) 22px 28px) 4;
+    color: var(--air-blue);
+    transform: rotate(-4deg);
+  }
+  .par b { font: 700 1.05rem var(--display); letter-spacing: .18em; text-transform: uppercase; font-style: italic; }
+  .par i { font: 700 .62rem var(--mono); letter-spacing: .2em; text-transform: uppercase; font-style: normal; }
+  .stamp-title {
+    display: inline-block;
+    margin-top: .4rem;
+    padding: .3rem .8rem;
+    border: 2px solid var(--red);
+    border-radius: .3rem;
+    color: var(--red);
+    font: 700 .78rem var(--mono);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    transform: rotate(3deg);
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(3.2rem, 15vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+  .when { font-style: italic; opacity: .85; max-width: 22rem; }
+  .intro { max-width: 17rem; font-family: var(--hand); font-size: 1.75rem; line-height: 1.15; color: var(--red); }
+  .swipe { margin-top: .6rem; display: flex; align-items: center; gap: .5rem; font: 700 .8rem var(--mono); letter-spacing: .22em; text-transform: uppercase; color: var(--red); }
+  .swipe i { font-style: normal; font-size: 1.5rem; animation: nudge 1.4s ease-in-out infinite; }
+  @keyframes nudge { 50% { transform: translateX(8px); } }
+  .moved .swipe { visibility: hidden; }
+
+  /* the picture, as a postage stamp */
+  .print { position: relative; margin: 0 auto; width: max-content; max-width: 100%; --ph: clamp(190px, 33vh, 380px); }
+  .print.tall { --ph: clamp(220px, 40vh, 430px); }
+  .postage {
+    border: 14px solid transparent;
+    border-image-source: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 42 42'%3E%3Cdefs%3E%3Cmask id='m'%3E%3Crect width='42' height='42' fill='white'/%3E%3Cg fill='black'%3E%3Ccircle cx='0' cy='0' r='5'/%3E%3Ccircle cx='42' cy='0' r='5'/%3E%3Ccircle cx='0' cy='42' r='5'/%3E%3Ccircle cx='42' cy='42' r='5'/%3E%3Ccircle cx='14' cy='0' r='5'/%3E%3Ccircle cx='28' cy='0' r='5'/%3E%3Ccircle cx='14' cy='42' r='5'/%3E%3Ccircle cx='28' cy='42' r='5'/%3E%3Ccircle cx='0' cy='14' r='5'/%3E%3Ccircle cx='0' cy='28' r='5'/%3E%3Ccircle cx='42' cy='14' r='5'/%3E%3Ccircle cx='42' cy='28' r='5'/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Crect width='42' height='42' fill='%23FFFDF6' mask='url(%23m)'/%3E%3C/svg%3E");
+    border-image-slice: 14 fill;
+    border-image-width: 14px;
+    border-image-repeat: round;
+    padding: .25rem .25rem .1rem;
+    filter: drop-shadow(0 12px 12px rgba(60,30,10,.45));
+    transform: rotate(var(--tilt, 0deg));
+  }
+  .photo {
+    position: relative;
+    width: min(calc(var(--ph) * var(--arn)), calc(100vw - 6.4rem));
+    aspect-ratio: var(--ar);
+    background: #d9c3a3;
+    overflow: hidden;
+  }
+  .photo img, .photo video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .postage figcaption {
+    width: 0;
+    min-width: 100%;
+    padding: .35rem .2rem .3rem;
+    font: 700 1.55rem var(--hand);
+    line-height: 1.05;
+    color: var(--blue);
+    text-align: center;
+  }
+
+  /* the postmark thunks down when you land */
+  .postmark {
+    position: absolute;
+    right: -.9rem;
+    bottom: 2.8rem;
+    width: 4.9rem;
+    height: 4.9rem;
+    border: 3px double var(--c);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--c);
+    font-family: var(--mono);
+    mix-blend-mode: multiply;
+    transform: rotate(-14deg);
+    pointer-events: none;
+  }
+  .postmark.red  { --c: var(--red); }
+  .postmark.blue { --c: var(--blue); }
+  .postmark.teal { --c: var(--teal); }
+  .postmark small { font-size: .5rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  .postmark b { font-size: 1.3rem; letter-spacing: .06em; line-height: 1.05; }
+  .js .postmark { opacity: 0; }
+  .js .page.hit .postmark { animation: thunk .55s cubic-bezier(.2,1.5,.4,1) .45s both; }
+  @keyframes thunk {
+    0%   { opacity: 0; transform: rotate(-38deg) scale(2); }
+    55%  { opacity: .95; }
+    100% { opacity: .88; transform: rotate(-14deg) scale(1); }
+  }
+
+  /* the collage plays on an in-flight seat-back screen */
+  .screen {
+    padding: .55rem .55rem .15rem;
+    background: #151C24;
+    border-radius: 1rem;
+    box-shadow: 0 0 0 3px #2C3642, 0 16px 26px rgba(50,25,10,.5);
+    color: #8FB0BD;
+  }
+  .screen-top { display: flex; justify-content: space-between; padding: .05rem .3rem .45rem; font: 700 .6rem var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+  .screen-top em { display: inline-block; width: .5rem; height: .5rem; margin-right: .2rem; border-radius: 50%; background: #E8554A; }
+  .screen .photo { border-radius: .35rem; background: #0C1218; }
+  .screen figcaption { padding: .3rem 0 .4rem; font: 700 1.7rem var(--hand); color: #EAF2F5; text-align: center; }
+
+  /* video overlay */
+  .play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(42,27,18,.6));
+    color: #fff;
+    cursor: pointer;
+    transition: opacity .3s;
+  }
+  .play i {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.92), 0 10px 24px rgba(0,0,0,.4);
+  }
+  .play i::before {
+    content: "";
+    margin-left: .3rem;
+    border-left: 1.05rem solid #fff;
+    border-top: .66rem solid transparent;
+    border-bottom: .66rem solid transparent;
+  }
+  .play span { position: absolute; left: 0; right: 0; bottom: .7rem; padding: 0 .3rem; font: 700 1.15rem/1 var(--hand); text-shadow: 0 1px 6px rgba(0,0,0,.7); }
+  .vid.playing .play { opacity: 0; pointer-events: none; }
+
+  /* boarding pass (the receipt) */
+  .pass-wrap { width: 100%; max-width: 25rem; filter: drop-shadow(0 8px 9px rgba(60,30,10,.35)); }
+  .pass {
+    display: grid;
+    grid-template-columns: 1fr 4.6rem;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: .76rem;
+    line-height: 1.5;
+    -webkit-mask:
+      radial-gradient(circle .5rem at calc(100% - 4.6rem) 0, transparent .47rem, #000 .5rem) top / 100% 52% no-repeat,
+      radial-gradient(circle .5rem at calc(100% - 4.6rem) 100%, transparent .47rem, #000 .5rem) bottom / 100% 52% no-repeat;
+            mask:
+      radial-gradient(circle .5rem at calc(100% - 4.6rem) 0, transparent .47rem, #000 .5rem) top / 100% 52% no-repeat,
+      radial-gradient(circle .5rem at calc(100% - 4.6rem) 100%, transparent .47rem, #000 .5rem) bottom / 100% 52% no-repeat;
+    border-radius: .45rem;
+  }
+  .pass .main { padding: .6rem .8rem .65rem; }
+  .pass .head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .3rem;
+    padding-bottom: .25rem;
+    border-bottom: 1px dashed rgba(42,27,18,.42);
+    color: var(--air-blue);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .pass .row { display: flex; justify-content: space-between; gap: .7rem; }
+  .pass .row span:first-child { flex: none; text-transform: uppercase; opacity: .6; }
+  .pass .row span:last-child { text-align: right; }
+  .pass .tail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: .4rem .3rem;
+    border-left: 2px dashed rgba(42,27,18,.45);
+    text-align: center;
+  }
+  .pass .tail b { font-size: 1.5rem; letter-spacing: .06em; line-height: 1; color: var(--red); }
+  .pass .tail small { margin-top: .3rem; font-size: .56rem; letter-spacing: .06em; text-transform: uppercase; opacity: .7; line-height: 1.3; }
+
+  .letter { width: 100%; max-width: 25rem; font-size: 1.08rem; line-height: 1.55; text-wrap: pretty; }
+
+  /* closing page */
+  .close .big { font: 700 1.8rem/1.2 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; margin-top: .6rem; }
+  .close .hand { max-width: 19rem; font: 500 1.8rem/1.1 var(--hand); color: var(--red); }
+  .go {
+    display: inline-block;
+    margin-top: .6rem;
+    padding: .95rem 2.3rem;
+    border-radius: 999px;
+    background: var(--red);
+    color: #FFF6E4;
+    text-decoration: none;
+    font: 600 1.1rem var(--display);
+    box-shadow: 0 0 0 4px rgba(255,253,246,.7), 0 10px 18px rgba(60,30,10,.35);
+    transition: transform .15s;
+  }
+  .go:active { transform: scale(.96); }
+  .books { display: flex; justify-content: center; gap: .6rem; margin-top: 1rem; }
+  .books i { width: .75rem; height: .75rem; border-radius: 50%; border: 2px solid rgba(42,27,18,.55); }
+  .books i.done { background: var(--red); border-color: var(--red); }
+  .books-note { font: 500 1.25rem var(--hand); opacity: .85; }
+
+  /* bottom navigation */
+  .nav {
+    flex: none;
+    height: calc(var(--navH) + env(safe-area-inset-bottom));
+    padding: 0 .9rem env(safe-area-inset-bottom);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    background: linear-gradient(180deg, rgba(251,244,228,.0), rgba(251,244,228,.22));
+  }
+  .nav button {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 50%;
+    border: 2px solid rgba(42,27,18,.7);
+    background: var(--paper);
+    color: var(--ink);
+    font: 700 1.2rem var(--mono);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(60,30,10,.25);
+  }
+  .nav button:disabled { opacity: .35; cursor: default; }
+  .nav button:active:not(:disabled) { transform: scale(.94); }
+  .dots { display: flex; align-items: center; gap: .32rem; }
+  .dots i { width: .4rem; height: .4rem; border-radius: 50%; background: rgba(42,27,18,.32); transition: width .3s, background .3s; }
+  .dots i.on { width: 1.1rem; border-radius: .3rem; background: var(--red); }
+
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+  /* wide screens: picture on the left, the letter on the right */
+  @media (min-width: 860px) and (min-height: 520px) {
+    :root { --routeH: 120px; }
+    .stop:not(.center) { max-width: 62rem; display: grid; grid-template-columns: auto minmax(0, 27rem); gap: 3.4rem; align-items: center; justify-content: center; }
+    .print { --ph: clamp(280px, 52vh, 560px); }
+    .print.tall { --ph: clamp(300px, 56vh, 600px); }
+    .photo { width: calc(var(--ph) * var(--arn)); }
+    .letter { font-size: 1.15rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plane svg, .swipe i { animation: none; }
+    .js .rise { transition: none; }
+    .js .page.hit .postmark { animation: none; opacity: .88; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="stripe" aria-hidden="true"></div>
+  <header class="bar"><span>Airmail &middot; Book 3 of 5</span><span id="count">Departure</span></header>
+
+  <div class="wrap">
+    <div class="scroller" id="scroller" tabindex="0" aria-label="Year Three. Swipe sideways to move between stops.">
+      <div class="track" id="track">
+        <svg class="route" id="route" aria-hidden="true" focusable="false">
+          <path id="routeBase"/>
+          <path id="routeLit"/>
+        </svg>
+        <span class="pin" style="--i:0"><i></i><b>DEP</b></span><span class="pin" style="--i:1"><i></i><b>MOV</b></span><span class="pin" style="--i:2"><i></i><b>CNC</b></span><span class="pin" style="--i:3"><i></i><b>CHR</b></span><span class="pin" style="--i:4"><i></i><b>HST</b></span><span class="pin" style="--i:5"><i></i><b>CTN</b></span><span class="pin" style="--i:6"><i></i><b>DNT</b></span><span class="pin" style="--i:7"><i></i><b>BCH</b></span><span class="pin" style="--i:8"><i></i><b>YOU</b></span><span class="pin" style="--i:9"><i></i><b>DNM</b></span><span class="pin" style="--i:10"><i></i><b>SGN</b></span><span class="pin" style="--i:11"><i></i><b>DEF</b></span><span class="pin" style="--i:12"><i></i><b>Y4</b></span>
+        
+    <section class="page cover" aria-label="Cover">
+      <div class="stop center">
+        <div class="par rise" style="--i:0"><b>Par avion</b><i>By air mail</i></div>
+        <span class="stamp-title rise" style="--i:1">Receipt book &middot; 3 of 5</span>
+        <h1 class="rise" style="--i:2">Year Three</h1>
+        <p class="when rise" style="--i:3">Trains, doughnuts, a night beach, and the end of the campus years</p>
+        <p class="intro rise" style="--i:4">Come, let's walk back through it together.</p>
+        <p class="swipe rise" style="--i:5" id="hint" aria-hidden="true"><span>swipe</span><i>&rarr;</i></p>
+      </div>
+    </section>
+    <!-- stop 1: MOV -->
+    <section class="page" aria-label="Stop 1 of 11">
+      <div class="stop">
+        <figure class="print rise tall" style="--i:0">
+          <div class="screen">
+            <div class="screen-top"><span>In-flight</span><span><em></em> Now playing</span></div>
+            <div class="photo vid" data-video style="--ar:608 / 1236; --arn:.492">
+              <video src="y3-00.mp4" poster="y3-00-poster.webp" playsinline preload="none" width="608" height="1236" aria-label="Video: a collage of our first two years together"></video>
+              <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+            </div>
+            <figcaption>The story so far</figcaption>
+          </div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>In-flight entertainment</span><span>Y3-000</span></div><div class="row"><span>Item</span><span>Two years, one video</span></div><div class="row"><span>Length</span><span>Never long enough</span></div><div class="row"><span>Warning</span><span>Feelings ahead</span></div></div>
+          <div class="tail"><b>MOV</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Before we go any further, let's look back. This is the last two years squeezed into one video. Some of it you'll remember straight away. Some of it we had both forgotten. Press play, turn the sound up, and watch it with me. Then we start Year Three.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 2: CNC -->
+    <section class="page" aria-label="Stop 2 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 4; --arn:.75"><img src="y3-01.webp" alt="The two of us at night at the Davido concert, me in an all-black outfit and a brown cap, her in a light tie-dye top, denim and a brown bag, both wearing wristbands" width="900" height="1200" loading="lazy" decoding="async"></div>
+            <figcaption>Davido night, December 2022</figcaption>
+          </div>
+          <div class="postmark red" aria-hidden="true"><small>Arrived</small><b>CNC</b><small>Dec 2022</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-001</span></div><div class="row"><span>Item</span><span>Two wristbands</span></div><div class="row"><span>Dress code</span><span>Matching by accident</span></div><div class="row"><span>Voice</span><span>Gone by midnight</span></div></div>
+          <div class="tail"><b>CNC</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">December 2022. We went to see Davido again, because he's your favourite and I was not complaining. I wore all black with my brown cap. You wore your adire top, denim and your brown bag. We never planned any of it, and somehow the colours worked anyway. Then we sang. Loud, under the stars, every song word for word, like the whole crowd was just backup for the two of us. I still can't tell you what he wore on stage. I only remember you singing next to me.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 3: CHR -->
+    <section class="page" aria-label="Stop 3 of 11">
+      <div class="stop">
+        <figure class="print rise tall" style="--i:0; --tilt:-1.6deg">
+          <div class="postage">
+            <div class="photo vid" data-video style="--ar:528 / 944; --arn:.559">
+              <video src="y3-02.mp4" poster="y3-02-poster.webp" playsinline preload="none" width="528" height="944" aria-label="Video: walking back from church on a visit to her school, with a joke in Yoruba"></video>
+              <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+            </div>
+            <figcaption>Back from church, caught on camera</figcaption>
+          </div>
+          <div class="postmark blue" aria-hidden="true"><small>Arrived</small><b>CHR</b><small>Sunday</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-002</span></div><div class="row"><span>Item</span><span>One walk back from church</span></div><div class="row"><span>Complaint</span><span>Filed, then dropped</span></div><div class="row"><span>Truth</span><span>Very happy to be there</span></div></div>
+          <div class="tail"><b>CHR</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">One of those Sundays I came to see you at school. We were walking back from church, and I turned the camera on myself and said, in Yoruba, “Sheri? Won tu ti wo mi wa o.” It means, “Can you see? They have brought me here again o.” You didn't even blink. You gave me the side-eye and said, “Like you're not happy to be here.” And that was it, you caught me. Of course I was happy. Those weekends around you were the most peaceful ones I had while we were apart.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 4: HST -->
+    <section class="page" aria-label="Stop 4 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 5; --arn:.6"><img src="y3-03.webp" alt="A funny selfie at her hostel, me in a cap and a blue shirt over a white tee pulling a face, her behind me pulling one too" width="540" height="900" loading="lazy" decoding="async"></div>
+            <figcaption>Funky faces, your hostel</figcaption>
+          </div>
+          <div class="postmark teal" aria-hidden="true"><small>Arrived</small><b>HST</b><small>Hostel</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-003</span></div><div class="row"><span>Item</span><span>Two silly faces</span></div><div class="row"><span>Venue</span><span>Your hostel, again</span></div><div class="row"><span>Plan</span><span>None. Perfect.</span></div></div>
+          <div class="tail"><b>HST</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Another visit to your hostel, another round of funny faces. I'm in front doing whatever this face is, and you're right behind me doing yours. Nothing was planned. We just sat there being silly. Those visits were the best part of my week, and I started counting down to them on Monday.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 5: CTN -->
+    <section class="page" aria-label="Stop 5 of 11">
+      <div class="stop">
+        <figure class="print rise tall" style="--i:0; --tilt:-1.6deg">
+          <div class="postage">
+            <div class="photo vid" data-video style="--ar:528 / 944; --arn:.559">
+              <video src="y3-04.mp4" poster="y3-04-poster.webp" playsinline preload="none" width="528" height="944" aria-label="Video from our third anniversary: me holding the cotton candy she asked for, and her saying hi to the camera"></video>
+              <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+            </div>
+            <figcaption>Third anniversary: cotton candy</figcaption>
+          </div>
+          <div class="postmark red" aria-hidden="true"><small>Arrived</small><b>CTN</b><small>3 years</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-004</span></div><div class="row"><span>Event</span><span>Our 3rd anniversary</span></div><div class="row"><span>Item</span><span>One cotton candy</span></div><div class="row"><span>Payment</span><span>Under polite pressure</span></div></div>
+          <div class="tail"><b>CTN</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Our third anniversary. You wanted cotton candy, and you asked for it very sweetly. (Some people would call it a threat.) But since when does my princess not get what she wants? So there I am, holding a cloud of sugar, trying to look like it was my idea. Then I turned the camera to you and said, “Say cheese.” You said, “Hiiiiii,” with that smile. I could replay that one word all day.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 6: DNT -->
+    <section class="page" aria-label="Stop 6 of 11">
+      <div class="stop">
+        <figure class="print rise tall" style="--i:0; --tilt:1.6deg">
+          <div class="postage">
+            <div class="photo vid" data-video style="--ar:528 / 944; --arn:.559">
+              <video src="y3-05.mp4" poster="y3-05-poster.webp" playsinline preload="none" width="528" height="944" aria-label="Video from our third anniversary: me feeding her a chocolate sprinkle doughnut on camera"></video>
+              <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+            </div>
+            <figcaption>Fed on camera, as promised</figcaption>
+          </div>
+          <div class="postmark blue" aria-hidden="true"><small>Arrived</small><b>DNT</b><small>3 years</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-005</span></div><div class="row"><span>Item</span><span>Chocolate sprinkle doughnuts</span></div><div class="row"><span>Proof</span><span>Recorded, for the record</span></div><div class="row"><span>Bite size</span><span>Huge</span></div></div>
+          <div class="tail"><b>DNT</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Same day, doughnut time. I told the camera, “Look everyone, I'm about to feed her before she says I don't feed her.” Then I did. You took the biggest bite, and I gave you my best side-eye with a scrunched-up face. You burst out laughing. That's it. That's the whole video. And somehow it's us, completely.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 7: BCH -->
+    <section class="page" aria-label="Stop 7 of 11">
+      <div class="stop">
+        <figure class="print rise tall" style="--i:0; --tilt:-1.6deg">
+          <div class="postage">
+            <div class="photo vid" data-video style="--ar:528 / 944; --arn:.559">
+              <video src="y3-06.mp4" poster="y3-06-poster.webp" playsinline preload="none" width="528" height="944" aria-label="Video of our first night at the beach: dark water behind us and both of us smiling"></video>
+              <button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button>
+            </div>
+            <figcaption>Our first beach, at night</figcaption>
+          </div>
+          <div class="postmark teal" aria-hidden="true"><small>Arrived</small><b>BCH</b><small>Night</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-006</span></div><div class="row"><span>Item</span><span>One night at the beach</span></div><div class="row"><span>Old plan</span><span>A rave (abandoned)</span></div><div class="row"><span>New plan</span><span>Sea, breeze, you</span></div></div>
+          <div class="tail"><b>BCH</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Our first time at the beach, and it was at night. We had actually gone out for a night rave, but it didn't go the way we expected. The beach was close by, so we left the party and walked to the water. Why? Let's just say we're not “beautiful people”, as Ed Sheeran would put it. We were happier on the sand. Cold breeze, dark sea, and the smiles you can see in this video. Best plan B we ever had.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 8: YOU -->
+    <section class="page" aria-label="Stop 8 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 4; --arn:.75"><img src="y3-07.webp" alt="Her in profile with long braids, a pink floral top and an earbud in, looking up" width="960" height="1280" loading="lazy" decoding="async"></div>
+            <figcaption>Not my photo. All my favourite.</figcaption>
+          </div>
+          <div class="postmark red" aria-hidden="true"><small>Arrived</small><b>YOU</b><small>Always</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-007</span></div><div class="row"><span>Item</span><span>One masterpiece</span></div><div class="row"><span>Photographer</span><span>Not me. No credit.</span></div><div class="row"><span>Verdict</span><span>No exceptions</span></div></div>
+          <div class="tail"><b>YOU</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">I couldn't leave this one out. By now it's a tradition: one photo of you that is too good to skip. I didn't take this one, so I won't take any credit. I just know a masterpiece when I see one. Side profile, long braids, lost in whatever you were listening to. The most beautiful woman on the entire planet. No exceptions.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 9: DNM -->
+    <section class="page" aria-label="Stop 9 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:-1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 4; --arn:.75"><img src="y3-08.webp" alt="Her smiling at the camera in a denim jacket and jeans in front of a campus building, on denim day during sign-out week" width="960" height="1280" loading="lazy" decoding="async"></div>
+            <figcaption>Denim on denim day</figcaption>
+          </div>
+          <div class="postmark blue" aria-hidden="true"><small>Arrived</small><b>DNM</b><small>Denim</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-008</span></div><div class="row"><span>Theme</span><span>Denim on denim</span></div><div class="row"><span>Photos sent</span><span>Too many to count</span></div><div class="row"><span>Me</span><span>Absent (work)</span></div></div>
+          <div class="tail"><b>DNM</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Sign-out week had a denim-on-denim day, and I couldn't be there because of work. You didn't let that stop you. You sent so many photos that I lost count, and this one became one of my favourites in my whole gallery. Look how happy you are. I was stuck at work, but it felt like I was right there next to you.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 10: SGN -->
+    <section class="page" aria-label="Stop 10 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 4; --arn:.75"><img src="y3-09.webp" alt="In black and white, her back to the camera in a white shirt covered in signatures, one hand holding up four fingers and the other holding a marker" width="960" height="1280" loading="lazy" decoding="async"></div>
+            <figcaption>Sign-out day, part two</figcaption>
+          </div>
+          <div class="postmark teal" aria-hidden="true"><small>Arrived</small><b>SGN</b><small>Signed</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-009</span></div><div class="row"><span>Item</span><span>One shirt, fully signed</span></div><div class="row"><span>Transport</span><span>Last train, night before</span></div><div class="row"><span>Fingers</span><span>Four. You know why.</span></div></div>
+          <div class="tail"><b>SGN</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Your sign-out day. Remember Year Two, when you showed up and screamed that your baby was a graduate? Now it was my turn to show up. So I took the last train on the metro the night before, just to be around for the day. And here you are: a white shirt covered in names, four fingers up, a marker in your other hand. I would take that last train again. Some days are meant to be shared.</p>
+        </div>
+      </div>
+    </section>
+    <!-- stop 11: DEF -->
+    <section class="page" aria-label="Stop 11 of 11">
+      <div class="stop">
+        <figure class="print rise" style="--i:0; --tilt:-1.6deg">
+          <div class="postage">
+            <div class="photo" style="--ar:3 / 4; --arn:.75"><img src="y3-10.webp" alt="Her smiling in a grey blouse and black trousers, holding her blue project, with a student lanyard and a bright pink hair bun, on a paved campus lot" width="960" height="1280" loading="lazy" decoding="async"></div>
+            <figcaption>Project defense: done!</figcaption>
+          </div>
+          <div class="postmark red" aria-hidden="true"><small>Arrived</small><b>DEF</b><small>Done</small></div>
+        </figure>
+        <div class="side">
+        <div class="pass-wrap rise" style="--i:1"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y3-010</span></div><div class="row"><span>Item</span><span>One project, defended</span></div><div class="row"><span>Feeling</span><span>Relief, finally</span></div><div class="row"><span>Next stop</span><span>The world</span></div></div>
+          <div class="tail"><b>DEF</b><small>Seats<br>14A + 14B</small></div>
+        </div></div>
+        <p class="letter rise" style="--i:2">Your project defense, the last real thing left at the university. Look at that smile. That's relief, pure and simple. It was also a goodbye to the place where our story started, so it felt bitter and sweet all at once. But we couldn't wait to step into the world together, side by side, facing the same storms. And, oh, what storms there have been. We'll get to those soon.</p>
+        </div>
+      </div>
+    </section>
+    <section class="page close" aria-label="Arrival">
+      <div class="stop center">
+        <div class="pass-wrap big rise" style="--i:0"><div class="pass">
+          <div class="main"><div class="head"><span>Boarding pass</span><span>Y4-001</span></div>
+            <div class="row"><span>Passengers</span><span>Two, still together</span></div>
+            <div class="row"><span>Baggage</span><span>Many memories</span></div>
+            <div class="row"><span>Weather</span><span>Some turbulence</span></div>
+          </div>
+          <div class="tail"><b>Y4</b><small>Gate 04<br>Now boarding</small></div>
+        </div></div>
+        <p class="big rise" style="--i:1">Year Three, closed.</p>
+        <p class="hand rise" style="--i:2">Please fasten your seatbelts. There is a little turbulence ahead.</p>
+        <a class="go rise" style="--i:3" href="year4.html">On to Year Four</a>
+        <div class="books rise" style="--i:4" role="img" aria-label="Receipt book 3 of 5"><i class="done"></i><i class="done"></i><i class="done"></i><i></i><i></i></div>
+        <p class="books-note rise" style="--i:4">3 of 5 receipt books</p>
+      </div>
+    </section>
+      </div>
+    </div>
+    <div class="plane" id="plane" aria-hidden="true">
+      <svg viewBox="-16 -13 32 26"><path d="M14 0 L-13 -10 L-8 0 L-13 10 Z" fill="#FFFDF6" stroke="#2A1B12" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 0 L-8 0 M-8 0 L-13 -10" stroke="#2A1B12" stroke-width="1" fill="none" stroke-linejoin="round" opacity=".7"/></svg>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Pages">
+    <button type="button" id="prev" aria-label="Previous stop">&larr;</button>
+    <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <button type="button" id="next" aria-label="Next stop">&rarr;</button>
+  </nav>
+  <div class="stripe" aria-hidden="true"></div>
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add("js");
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var scroller = document.getElementById("scroller");
+    var pages = [].slice.call(document.querySelectorAll(".page"));
+    var pins = [].slice.call(document.querySelectorAll(".pin"));
+    var dots = [].slice.call(document.querySelectorAll("#dots i"));
+    var route = document.getElementById("route");
+    var base = document.getElementById("routeBase");
+    var lit = document.getElementById("routeLit");
+    var plane = document.getElementById("plane");
+    var count = document.getElementById("count");
+    var prev = document.getElementById("prev");
+    var next = document.getElementById("next");
+    var N = pages.length, STOPS = 11;
+    var W = 0, segLen = 0, y0 = 72, hump = 30, lastK = -1, cur = -1, ticking = false;
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    /* the route: a row of flight arcs, one between every pair of stops */
+    function build() {
+      W = scroller.clientWidth;
+      hump = clamp(W * 0.07, 22, 46);
+      route.setAttribute("width", W * N);
+      route.setAttribute("height", 110);
+      route.setAttribute("viewBox", "0 0 " + (W * N) + " 110");
+      var d = "M" + (W * 0.5) + " " + y0;
+      for (var i = 0; i < N - 1; i++) {
+        var x0 = (i + 0.5) * W;
+        d += " Q" + (x0 + W / 2) + " " + (y0 - 2 * hump) + " " + (x0 + W) + " " + y0;
+      }
+      base.setAttribute("d", d);
+      lit.setAttribute("d", d);
+      segLen = base.getTotalLength() / (N - 1);
+      lastK = -1;
+      scroller.scrollLeft = Math.max(cur, 0) * W;
+      update();
+      plane.style.visibility = "visible";
+    }
+
+    /* the plane stays put on screen while the route slides past, climbing and dropping along each arc */
+    function update() {
+      ticking = false;
+      var sl = scroller.scrollLeft;
+      var s = clamp(sl / W, 0, N - 1);
+      var i = Math.min(Math.floor(s), N - 2), t = s - i;
+      var y = y0 - 11 - 4 * hump * t * (1 - t);
+      var ang = Math.atan2(-4 * hump * (1 - 2 * t), W) * 180 / Math.PI;
+      var x = (i + 0.5) * W + W * t - sl;
+      plane.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) rotate(" + ang.toFixed(1) + "deg)";
+
+      var K = Math.floor(s * segLen / 13);
+      if (K !== lastK) {
+        lastK = K;
+        lit.style.strokeDasharray = (K > 0 ? new Array(K + 1).join("0 13 ") : "") + "0 100000";
+      }
+      var idx = Math.round(s);
+      if (idx !== cur) setCurrent(idx);
+    }
+
+    function setCurrent(idx) {
+      cur = idx;
+      pages.forEach(function (p, k) { p.classList.toggle("hit", k === idx); if (k === idx) p.classList.add("in"); });
+      pins.forEach(function (p, k) { p.classList.toggle("reached", k <= idx); });
+      dots.forEach(function (d, k) { d.classList.toggle("on", k === idx); });
+      count.textContent = idx === 0 ? "Departure" : (idx === N - 1 ? "Arrival" : "Stop " + idx + " / " + STOPS);
+      prev.disabled = idx === 0;
+      next.disabled = idx === N - 1;
+      if (idx > 0) root.classList.add("moved");
+      pages.forEach(function (p, k) {
+        if (k !== idx) [].forEach.call(p.querySelectorAll("video"), function (v) { if (!v.paused) v.pause(); });
+      });
+    }
+
+    function go(n) {
+      n = clamp(n, 0, N - 1);
+      scroller.scrollTo({ left: n * W, behavior: reduce ? "auto" : "smooth" });
+    }
+
+    scroller.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    prev.addEventListener("click", function () { go(cur - 1); });
+    next.addEventListener("click", function () { go(cur + 1); });
+    window.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "PageDown") { go(cur + 1); e.preventDefault(); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { go(cur - 1); e.preventDefault(); }
+    });
+
+    /* mouse wheel: one notch of scrolling flips one page (unless the page itself still has more to scroll) */
+    var wheelLock = false;
+    scroller.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      var pg = e.target.closest ? e.target.closest(".page") : null;
+      if (pg && pg.scrollHeight > pg.clientHeight + 2) {
+        var atTop = pg.scrollTop <= 0, atEnd = pg.scrollTop + pg.clientHeight >= pg.scrollHeight - 2;
+        if ((e.deltaY < 0 && !atTop) || (e.deltaY > 0 && !atEnd)) return;
+      }
+      e.preventDefault();
+      if (wheelLock || Math.abs(e.deltaY) < 4) return;
+      wheelLock = true;
+      go(cur + (e.deltaY > 0 ? 1 : -1));
+      setTimeout(function () { wheelLock = false; }, 700);
+    }, { passive: false });
+
+    var rt;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(build, 120); });
+    window.addEventListener("load", build);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(build); }
+
+    /* pages fade their contents in as they arrive */
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) e.target.classList.add("in"); });
+      }, { root: scroller, threshold: 0.5 });
+      pages.forEach(function (p) { io.observe(p); });
+    } else {
+      pages.forEach(function (p) { p.classList.add("in", "hit"); });
+    }
+
+    build();
+    setCurrent(0);
+
+    /* videos: tap to play with sound, one at a time */
+    var vids = [].slice.call(document.querySelectorAll("[data-video]"));
+    vids.forEach(function (box) {
+      var v = box.querySelector("video");
+      var btn = box.querySelector(".play");
+      var label = btn.querySelector("span");
+      var idle = label.textContent;
+
+      function start() {
+        vids.forEach(function (o) { var ov = o.querySelector("video"); if (ov !== v && !ov.paused) ov.pause(); });
+        label.textContent = "loading...";
+        v.muted = false;
+        var pr = v.play();
+        if (pr && pr.catch) { pr.catch(function () { v.muted = true; v.play(); }); }
+      }
+      btn.addEventListener("click", start);
+      v.addEventListener("click", function () { if (v.paused) { start(); } else { v.pause(); } });
+      v.addEventListener("playing", function () { box.classList.add("playing"); });
+      v.addEventListener("pause", function () { box.classList.remove("playing"); label.textContent = idle; });
+      v.addEventListener("ended", function () { box.classList.remove("playing"); label.textContent = idle; v.currentTime = 0; });
+    });
+  })();
+</script>
+</body>
+</html>
