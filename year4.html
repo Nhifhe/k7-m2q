@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E3B3A">
+<title>Nifemi | Year Four</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; }
+
+  :root {
+    --teal: #0E3B3A;
+    --teal2: #17615E;
+    --cream: #F6EBD3;
+    --orange: #F26B3A;
+    --mustard: #F2B63D;
+    --aqua: #5DE0D3;
+    --ink: #1E1A16;
+    --display: "Fraunces", Georgia, serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --mono: "Courier Prime", "Courier New", monospace;
+    --p: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; background: #06222B; }
+
+  body {
+    min-height: 100vh;
+    color: var(--cream);
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* ===== the stage behind everything ===== */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 90% 45% at 50% 108%, rgba(170,45,100,.6), transparent 70%),
+      radial-gradient(ellipse 70% 40% at 10% 0%, rgba(23,97,94,.7), transparent 70%),
+      linear-gradient(180deg, #06222B 0%, #0E3B3A 48%, #1B2450 100%);
+  }
+  .beam {
+    position: absolute;
+    top: -8vh;
+    width: 120vmax;
+    height: 120vh;
+    margin-left: -60vmax;
+    transform-origin: 50% 0;
+    mix-blend-mode: screen;
+    background: conic-gradient(from 164deg at 50% 0%, transparent 0deg, var(--c) 16deg, transparent 32deg, transparent 360deg);
+    animation: sweep var(--t) ease-in-out infinite alternate;
+  }
+  .beam.b1 { left: 14%; --c: rgba(242,182,61,.26); --t: 9s; --a: -16deg; --b: 14deg; }
+  .beam.b2 { left: 52%; --c: rgba(93,224,211,.2);  --t: 12s; --a: 18deg; --b: -12deg; }
+  .beam.b3 { left: 88%; --c: rgba(242,107,58,.26); --t: 10s; --a: -10deg; --b: 16deg; }
+  @keyframes sweep { from { transform: rotate(var(--a)); } to { transform: rotate(var(--b)); } }
+
+  .vinyl {
+    position: absolute;
+    right: -38vmin;
+    bottom: -34vmin;
+    width: 96vmin;
+    height: 96vmin;
+    border-radius: 50%;
+    opacity: .55;
+    background:
+      radial-gradient(circle, var(--orange) 0 8%, #1b1b1b 8.5% 10.5%, transparent 10.5%),
+      repeating-radial-gradient(circle, #0c1114 0 2px, #1a2227 2px 4px);
+    transform: rotate(calc(var(--p) * 1440deg));
+  }
+  .vinyl::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 20deg, transparent 0 18%, rgba(255,255,255,.1) 22% 28%, transparent 32% 68%, rgba(255,255,255,.09) 72% 78%, transparent 82%);
+  }
+  .notes span {
+    position: absolute;
+    bottom: -8vh;
+    left: var(--x);
+    font-size: var(--s);
+    color: var(--col);
+    opacity: 0;
+    animation: floatup var(--d) ease-in var(--delay) infinite;
+  }
+  @keyframes floatup {
+    0%   { transform: translate3d(0, 0, 0) rotate(-10deg); opacity: 0; }
+    12%  { opacity: .5; }
+    50%  { transform: translate3d(var(--dx), -55vh, 0) rotate(12deg); }
+    100% { transform: translate3d(calc(var(--dx) * -.6), -112vh, 0) rotate(-8deg); opacity: 0; }
+  }
+  .eqwall { position: absolute; left: 0; right: 0; bottom: 0; height: 17vh; display: flex; align-items: flex-end; gap: 3px; padding: 0 3px; opacity: .55; }
+  .eqwall i {
+    flex: 1;
+    height: var(--h);
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(to top, rgba(242,107,58,.75), rgba(242,182,61,.05));
+    transform-origin: bottom;
+    animation: eqw 1.5s ease-in-out var(--dl) infinite alternate;
+  }
+  @keyframes eqw { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+
+  /* ===== sticky tape deck ===== */
+  .deck {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: calc(.55rem + env(safe-area-inset-top)) 1rem .6rem;
+    background: rgba(8,36,40,.9);
+    border-bottom: 1px solid rgba(246,235,211,.15);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .deck-row { max-width: 32rem; margin: 0 auto; display: flex; align-items: center; gap: .7rem; }
+  .mini { display: flex; gap: .25rem; padding: .3rem .4rem; background: var(--orange); border-radius: .35rem; }
+  .mini .reels { display: flex; gap: .25rem; transform: rotate(calc(var(--p) * 2400deg)); }
+  .mini .reel { width: 1.05rem; height: 1.05rem; }
+  .now { flex: 1; font: 700 .72rem var(--mono); letter-spacing: .12em; text-transform: uppercase; line-height: 1.3; }
+  .now small { display: block; font-weight: 400; opacity: .7; letter-spacing: .08em; }
+  .clock { font: 700 .85rem var(--mono); font-variant-numeric: tabular-nums; color: var(--mustard); }
+  .bar { max-width: 32rem; margin: .5rem auto 0; height: 4px; background: rgba(246,235,211,.18); border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: calc(var(--p) * 100%); background: var(--mustard); }
+
+  .reel { position: relative; border-radius: 50%; background: repeating-conic-gradient(var(--cream) 0 22deg, #8c7f6a 22deg 60deg); }
+  .reel::after { content: ""; position: absolute; inset: 28%; border-radius: 50%; background: var(--ink); }
+
+  .book { position: relative; max-width: 32rem; margin: 0 auto; padding: 2rem 1.1rem calc(4rem + env(safe-area-inset-bottom)); }
+  .cover, #tracks, .close { position: relative; z-index: 1; }
+
+  /* ===== the tape that threads through the whole page ===== */
+  .ribbon { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
+  .ribbon path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .t-glow  { stroke: rgba(0,0,0,.35); stroke-width: 17; }
+  .t-base  { stroke: #2A1B13; stroke-width: 11; }
+  .t-sheen { stroke: #7A5238; stroke-width: 2.4; opacity: .85; }
+  .t-play  { stroke: var(--orange); stroke-width: 11; }
+  .t-playsheen { stroke: #FFD98A; stroke-width: 2.4; }
+  .head-halo { fill: rgba(242,182,61,.28); }
+  .head-dot  { fill: var(--mustard); stroke: #fff; stroke-width: 2; }
+
+  /* ===== cover ===== */
+  .cover { text-align: center; padding: 1rem 0 3.2rem; }
+  .stamp { display: inline-block; padding: .3rem .8rem; border: 2px solid var(--mustard); border-radius: .3rem; color: var(--mustard); font: 700 .78rem var(--mono); letter-spacing: .18em; text-transform: uppercase; transform: rotate(-3deg); }
+  h1 { margin: 1rem 0 1.4rem; font-family: var(--display); font-weight: 700; font-size: clamp(3.2rem, 16vw, 4.6rem); line-height: 1; letter-spacing: -.02em; font-variation-settings: "SOFT" 100, "WONK" 1; }
+  .tape {
+    position: relative; z-index: 2; width: min(100%, 21rem); aspect-ratio: 1.58; margin: 0 auto; padding: .8rem; border-radius: 1rem;
+    background: linear-gradient(160deg, #F7794A, #D9542A);
+    box-shadow: 0 2px 0 rgba(0,0,0,.2), 0 22px 36px rgba(0,0,0,.5);
+    transform: rotate(-2deg);
+  }
+  .tape .screw { position: absolute; width: .6rem; height: .6rem; border-radius: 50%; background: #8f3a1b; box-shadow: inset 0 1px 1px rgba(0,0,0,.4); }
+  .tape .screw.a { top: .4rem; left: .45rem; } .tape .screw.b { top: .4rem; right: .45rem; }
+  .tape .screw.c { bottom: .4rem; left: .45rem; } .tape .screw.d { bottom: .4rem; right: .45rem; }
+  .label { height: 56%; padding: .5rem .8rem; border-radius: .4rem; text-align: left; color: var(--ink); background: repeating-linear-gradient(0deg, transparent 0 1.5rem, rgba(30,26,22,.18) 1.5rem calc(1.5rem + 1px)), var(--cream); }
+  .label .side { float: right; font: 700 1.6rem var(--display); color: var(--orange); line-height: 1; }
+  .label .l1 { font: 700 1.55rem/1.15 var(--hand); }
+  .label .l2 { font: 700 1.2rem/1.15 var(--hand); color: #5b4a3a; }
+  .window { position: absolute; left: 50%; bottom: 1rem; width: 62%; height: 28%; transform: translateX(-50%); display: flex; align-items: center; justify-content: space-between; padding: 0 .9rem; background: var(--ink); border-radius: 999px; border: 2px solid rgba(0,0,0,.35); }
+  .window .reel { width: 2rem; height: 2rem; animation: spin 5s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .intro { margin: 1.8rem auto 0; max-width: 18rem; font: 700 1.8rem/1.15 var(--hand); color: var(--mustard); text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+  .down { margin-top: .5rem; color: var(--mustard); font-size: 1.5rem; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+
+  /* ===== tracks: content hugs one side so the tape has a lane on the other ===== */
+  .track { position: relative; margin-bottom: 4.2rem; }
+  .col { position: relative; width: 84%; }
+  .track.L .col { margin-right: auto; }
+  .track.R .col { margin-left: auto; }
+
+  .tnum { font: 700 .8rem var(--mono); letter-spacing: .22em; text-transform: uppercase; color: var(--mustard); text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+  .ttitle { margin: .2rem 0 .8rem; display: flex; align-items: flex-end; justify-content: space-between; gap: .8rem; font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1.15; font-variation-settings: "SOFT" 100, "WONK" 1; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .eq { display: flex; align-items: flex-end; gap: 3px; height: 1.4rem; flex: none; }
+  .eq i { width: 4px; height: 25%; background: var(--orange); border-radius: 2px; }
+  .track.on .eq i { animation: eq .9s ease-in-out infinite alternate; }
+  .track.on .eq i:nth-child(2) { animation-delay: -.3s; } .track.on .eq i:nth-child(3) { animation-delay: -.6s; }
+  .track.on .eq i:nth-child(4) { animation-delay: -.15s; } .track.on .eq i:nth-child(5) { animation-delay: -.45s; }
+  @keyframes eq { from { height: 20%; } to { height: 100%; } }
+
+  .sleeve { --r: -1.6deg; position: relative; padding: .65rem .65rem .3rem; background: #fff; color: var(--ink); box-shadow: 0 2px 0 rgba(0,0,0,.15), 0 18px 30px rgba(0,0,0,.45); transform: rotate(var(--r)); }
+  .track.R .sleeve { --r: 1.5deg; }
+  .sticker { position: absolute; top: -.8rem; right: -.4rem; z-index: 2; padding: .15rem .6rem; border-radius: .3rem; background: var(--mustard); color: var(--ink); font: 700 .8rem var(--mono); letter-spacing: .12em; transform: rotate(4deg); box-shadow: 0 3px 6px rgba(0,0,0,.3); }
+  .photo { position: relative; aspect-ratio: var(--ar, 3 / 4); background: var(--teal2); overflow: hidden; }
+  .photo img, .photo video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .strip { display: grid; gap: .45rem; }
+  .strip .frame { position: relative; aspect-ratio: var(--ar, 5 / 4); background: var(--teal2); overflow: hidden; }
+  .strip .frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center; background: repeating-linear-gradient(135deg, #1b6f6b 0 12px, #17615E 12px 24px); color: var(--cream); font: 700 .8rem var(--mono); letter-spacing: .08em; }
+  .sleeve figcaption { padding: .5rem .2rem .5rem; text-align: center; font: 700 1.6rem/1.05 var(--hand); color: #17413f; }
+
+  .play { position: absolute; inset: 0; display: grid; place-items: center; border: 0; color: #fff; cursor: pointer; background: linear-gradient(180deg, transparent 50%, rgba(14,59,58,.7)); transition: opacity .3s; }
+  .play i { display: grid; place-items: center; width: 3.8rem; height: 3.8rem; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 10px 24px rgba(0,0,0,.45); }
+  .play i::before { content: ""; margin-left: .3rem; border-left: 1rem solid #fff; border-top: .62rem solid transparent; border-bottom: .62rem solid transparent; }
+  .play span { position: absolute; left: 0; right: 0; bottom: .8rem; font: 700 1.3rem var(--hand); text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .vid.playing .play { opacity: 0; pointer-events: none; }
+
+  .ticket { --r2: 1.4deg; position: relative; z-index: 1; width: 92%; margin: -.5rem 0 0 auto; filter: drop-shadow(0 8px 10px rgba(0,0,0,.45)); transform: rotate(var(--r2)); }
+  .track.R .ticket { --r2: -1.4deg; margin: -.5rem auto 0 0; }
+  .ticket-in {
+    --n: .55rem; padding: .8rem 1.1rem .9rem; background: #FFF9EC; color: var(--ink); font: .78rem/1.5 var(--mono);
+    -webkit-mask: radial-gradient(circle at 0 50%, transparent var(--n), #000 calc(var(--n) + .5px)) left / 52% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent var(--n), #000 calc(var(--n) + .5px)) right / 52% 100% no-repeat;
+    mask: radial-gradient(circle at 0 50%, transparent var(--n), #000 calc(var(--n) + .5px)) left / 52% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent var(--n), #000 calc(var(--n) + .5px)) right / 52% 100% no-repeat;
+  }
+  .ticket b { display: block; margin-bottom: .35rem; padding-bottom: .3rem; border-bottom: 1px dashed rgba(30,26,22,.45); letter-spacing: .1em; text-transform: uppercase; font-size: .76rem; }
+  .ticket div { display: flex; justify-content: space-between; gap: .7rem; }
+  .ticket div span:first-child { text-transform: uppercase; opacity: .6; flex: none; }
+  .ticket div span:last-child { text-align: right; }
+
+  .story { position: relative; z-index: 1; margin-top: 1.2rem; padding: .95rem 1.05rem; font-size: 1.08rem; line-height: 1.55; background: rgba(246,235,211,.96); color: var(--ink); border-radius: .9rem; box-shadow: 0 10px 22px rgba(0,0,0,.35); text-wrap: pretty; }
+
+  .js .sleeve, .js .ticket, .js .story { opacity: 0; transition: opacity .7s ease, transform .8s cubic-bezier(.2,1.2,.4,1); }
+  .js .sleeve { transform: translateY(26px) rotate(var(--r)); }
+  .js .ticket { transform: translateY(18px) rotate(var(--r2)); transition-delay: .2s; }
+  .js .story  { transform: translateY(18px); transition-delay: .35s; }
+  .js .track.on .sleeve { opacity: 1; transform: rotate(var(--r)); }
+  .js .track.on .ticket { opacity: 1; transform: rotate(var(--r2)); }
+  .js .track.on .story  { opacity: 1; transform: none; }
+
+  .flip { text-align: center; margin: 0 0 4.2rem; }
+  .flip .big { font: 700 3rem/1 var(--display); color: var(--orange); font-variation-settings: "SOFT" 100, "WONK" 1; text-shadow: 0 3px 14px rgba(0,0,0,.6); }
+  .flip .hand { font: 700 1.6rem var(--hand); color: var(--mustard); text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .flip .arrow { display: inline-block; margin-top: .3rem; font-size: 1.6rem; color: var(--mustard); animation: flipit 2.4s ease-in-out infinite; }
+  @keyframes flipit { 0%, 60%, 100% { transform: rotateX(0); } 80% { transform: rotateX(180deg); } }
+
+  .close { text-align: center; padding-top: 1.5rem; }
+  .close .big { font: 700 1.9rem/1.2 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .close .hand { margin: .5rem auto 2.2rem; max-width: 19rem; font: 700 1.85rem/1.1 var(--hand); color: var(--mustard); text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .go { position: relative; display: inline-block; padding: .95rem 2.3rem; border-radius: 999px; background: var(--orange); color: #fff; text-decoration: none; font: 600 1.1rem var(--display); box-shadow: 0 0 0 4px rgba(246,235,211,.35); transition: transform .15s, box-shadow .15s; }
+  .go:active { transform: scale(.96); box-shadow: 0 0 0 7px rgba(246,235,211,.35); }
+  .books { display: flex; justify-content: center; gap: .6rem; margin-top: 2rem; }
+  .books i { width: .75rem; height: .75rem; border-radius: 50%; border: 2px solid rgba(246,235,211,.55); }
+  .books i.done { background: var(--mustard); border-color: var(--mustard); }
+  .books-note { margin-top: .5rem; font: 500 1.25rem var(--hand); color: var(--cream); opacity: .9; }
+
+  :focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .window .reel, .down, .flip .arrow, .track.on .eq i, .beam, .eqwall i, .notes span { animation: none; }
+    .notes, .eqwall { display: none; }
+    .eq i { height: 60%; }
+    .js .sleeve, .js .ticket, .js .story { transition: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div>
+  <div class="vinyl"></div>
+  <div class="notes" id="notes"></div>
+  <div class="eqwall" id="eqwall"></div>
+</div>
+
+<div class="deck" aria-hidden="true">
+  <div class="deck-row">
+    <div class="mini"><div class="reels"><span class="reel"></span><span class="reel"></span></div></div>
+    <div class="now"><span id="nowSide">Side A</span><small id="nowTrack">Press play</small></div>
+    <div class="clock" id="clock">0:00</div>
+  </div>
+  <div class="bar"><i></i></div>
+</div>
+
+<main class="book" id="book">
+
+  <svg class="ribbon" id="ribbon" aria-hidden="true">
+    <path class="t-glow" id="pGlow"/>
+    <path class="t-base" id="pBase"/>
+    <path class="t-sheen" id="pSheen"/>
+    <path class="t-play" id="pPlay"/>
+    <path class="t-playsheen" id="pPlaySheen"/>
+    <g id="head" style="display:none"><circle class="head-halo" r="17"/><circle class="head-dot" r="7"/></g>
+  </svg>
+
+  <header class="cover">
+    <span class="stamp">Receipt book &middot; 4 of 5</span>
+    <h1>Year Four</h1>
+    <div class="tape" id="cassette" aria-hidden="true">
+      <span class="screw a"></span><span class="screw b"></span><span class="screw c"></span><span class="screw d"></span>
+      <div class="label"><span class="side">A</span><div class="l1">Nifemi + Ife</div><div class="l2">Year Four Mixtape</div></div>
+      <div class="window"><span class="reel"></span><span class="reel"></span></div>
+    </div>
+    <p class="intro">Press play. Follow the tape.</p>
+    <p class="down" aria-hidden="true">&#8595;</p>
+  </header>
+
+  <section id="tracks"></section>
+
+  <footer class="close">
+    <p class="big">Year Four, closed.</p>
+    <p class="hand">Balance remaining: one very full heart. Rewind anytime.</p>
+    <a class="go" id="nextBtn" href="year5.html">On to Year Five</a>
+    <div class="books" role="img" aria-label="Receipt book 4 of 5"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i></i></div>
+    <p class="books-note">4 of 5 receipt books</p>
+  </footer>
+</main>
+
+<script>
+  /* ================= EDIT HERE =================
+     One entry per memory: photo, strip (several photos), or video with poster.
+     len is the playful track length (mm:ss). */
+  const TRACKS = [
+    { title: "Dance Floor Duty", len: "3:12",
+      video: "y4-01.mp4", poster: "y4-01-poster.webp", ar: "9 / 16",
+      alt: "A short video from a work event: the two of us in matching orange and green fabric, with people dancing behind us",
+      cap: "Same fabric, same energy",
+      rows: [["Item", "One work event, planned by her"], ["Dress code", "Orange stripes and green"], ["Attendance", "Self-appointed, of course"]],
+      story: "A work event you helped plan; as usual, you hopped right in to make it happen. You wore an orange striped and green dress, and I turned up in a cap made from the very same fabric, because who else was going to show up for my other half better than me? No one. Dancing behind us, music all around us, and the two of us matching like it was always the plan." },
+
+    { title: "Wash Day", len: "2:47",
+      strip: [
+        { src: "y4-02a.webp", ar: "5 / 4",   alt: "Her leaning over my shoulder, giving the camera a little peck" },
+        { src: "y4-02b.webp", ar: "27 / 32", alt: "The two of us in black and white, framed like an Instagram post with the caption Keep moving" },
+        { src: "y4-02c.webp", ar: "5 / 4",   alt: "The two of us laughing with huge smiles, the goofiest picture of the day" }
+      ],
+      cap: "Hair day, zero seriousness",
+      rows: [["Item", "One hair wash, assisted"], ["Assistant", "Ife, volunteering"], ["Result", "Clean hair, sore cheeks"]],
+      story: "You came over to help me wash my hair, and as usual we goofed around instead of being sensible. First, you lean over my shoulder with a peck for the camera. Then comes the black and white one that looks like an Instagram post. And last, the goofiest: big smiles, big laughs, like everything in the world was fine. There is no grand story here, just two people who loved each other so much we forgot everything else and focused on how we felt in that moment." },
+
+    { title: "Popsicle Run", len: "4:20",
+      video: "y4-03.mp4", poster: "y4-03-poster.webp", ar: "33 / 59",
+      alt: "A very dark video of the two of us out on an ice cream date, with only our outlines visible",
+      cap: "Barely visible, completely us",
+      rows: [["Item", "Two popsicles, finally"], ["Lighting", "Practically none"], ["Occasion", "Just because"]],
+      story: "A random ice cream date: we strolled out for popsicles because you had been wanting one. It is so dark you can barely make out our outlines, and I love it exactly for that. We were not made only for the big moments; we were made from the little ones, and we found love right where we were." },
+
+    { title: "Our Time Will Come", len: "3:33",
+      video: "y4-04.mp4", poster: "y4-04-poster.webp", ar: "33 / 59",
+      alt: "A video of the two of us as wedding guests, making goofy faces, blowing kisses and winking at the camera",
+      cap: "Goofy faces at a wedding",
+      rows: [["Item", "One wedding invitation"], ["Plus-one", "Me, gladly"], ["Behaviour", "Faces, kisses, winks"]],
+      story: "Your cousin was getting married, and you invited me. After all the mushiness and cheesiness of watching two people commit to forever, we made this video together: goofy faces, smiles, kisses for the camera, winks for whoever was next in the frame. And I could not help thinking, our time will come, and what a time it will be." },
+
+    { title: "Portrait of Ife", len: "5:00",
+      photo: "y4-05.webp", alt: "A close black and white portrait of her smiling in a plaid shirt with a white bag and a heart necklace, in front of leaves",
+      cap: "The most beautiful woman in the world",
+      rows: [["Item", "One portrait, black and white"], ["Contents", "Trees, a bag, a heart necklace"], ["Value", "Beyond any Klimt"]],
+      story: "Look at it up close: the heart necklace, the trees behind you, the bag, the shirt, the relaxed pose. None of it is grand, and that is the whole point; the little things become more than the sum of their parts. If I could hang one portrait next to Klimt's Portrait of Elisabeth Lederer and charge more for it, it would be this one. It is a picture of the most beautiful woman in the world, and I am the lucky one who gets to love her." }
+  ];
+  const FLIP_AFTER = 3;   // the tape flips to Side B after this many tracks
+  /* ============================================= */
+
+  (function () {
+    var root = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var secs = function (s) { var a = s.split(":"); return (+a[0]) * 60 + (+a[1]); };
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+
+    /* ----- build the tracks ----- */
+    var out = "";
+    TRACKS.forEach(function (t, i) {
+      var n = i + 1, side = n <= FLIP_AFTER ? "A" : "B", code = side + (side === "A" ? n : n - FLIP_AFTER);
+      var lane = n % 2 === 1 ? "L" : "R";   // L: content on the left, tape lane on the right
+      if (n === FLIP_AFTER + 1) {
+        out += '<div class="flip"><div class="big">Side B</div><div class="hand">Flip the tape</div><div class="arrow" aria-hidden="true">&#8635;</div></div>';
+      }
+      var media;
+      if (t.strip) {
+        media = '<div class="strip">' + t.strip.map(function (fr) {
+          return '<div class="frame" style="--ar:' + fr.ar + '"><img src="' + fr.src + '" alt="' + fr.alt + '" loading="lazy" decoding="async"></div>';
+        }).join("") + '</div>';
+      } else if (t.video) {
+        media = '<div class="photo vid" style="--ar:' + (t.ar || "3 / 5") + '" data-video><video src="' + t.video + '" poster="' + (t.poster || "") + '" playsinline preload="metadata" aria-label="' + t.alt + '"></video>' +
+                '<button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button></div>';
+      } else {
+        media = '<div class="photo" style="--ar:' + (t.ar || "3 / 4") + '">' +
+                (t.photo ? '<img src="' + t.photo + '" alt="' + t.alt + '" loading="lazy" decoding="async" onerror="this.remove()">' : '') +
+                '<div class="ph" style="z-index:' + (t.photo ? "-1" : "0") + '">photo goes here<br>(' + (t.photo || "y4-" + pad(n) + ".webp") + ')</div></div>';
+      }
+      var rows = (t.rows || []).map(function (r) { return "<div><span>" + r[0] + "</span><span>" + r[1] + "</span></div>"; }).join("");
+      out += '<article class="track ' + lane + '" data-side="' + side + '" data-n="' + n + '" data-len="' + secs(t.len) + '"><div class="col">' +
+        '<div class="tnum">Track ' + pad(n) + ' &middot; ' + t.len + '</div>' +
+        '<h2 class="ttitle"><span>' + t.title + '</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></h2>' +
+        '<figure class="sleeve"><span class="sticker">' + code + '</span>' + media + '<figcaption>' + t.cap + '</figcaption></figure>' +
+        '<div class="ticket"><div class="ticket-in"><b>Receipt No. ' + pad(n) + '</b>' + rows + '</div></div>' +
+        '<p class="story">' + t.story + '</p></div></article>';
+    });
+    document.getElementById("tracks").innerHTML = out;
+
+    var tracks = [].slice.call(document.querySelectorAll(".track"));
+    var total = TRACKS.reduce(function (a, t) { return a + secs(t.len); }, 0);
+
+    /* ----- the stage: floating notes and an equalizer skyline ----- */
+    if (!reduce) {
+      var notes = document.getElementById("notes"), glyphs = ["\u266A", "\u266B", "\u266C"], cols = ["#F2B63D", "#F6EBD3", "#5DE0D3", "#F26B3A"];
+      for (var k = 0; k < 12; k++) {
+        var s = document.createElement("span");
+        s.textContent = glyphs[k % 3];
+        s.style.setProperty("--x", rnd(2, 96).toFixed(1) + "%");
+        s.style.setProperty("--s", rnd(18, 36).toFixed(0) + "px");
+        s.style.setProperty("--d", rnd(14, 26).toFixed(1) + "s");
+        s.style.setProperty("--delay", (-rnd(0, 24)).toFixed(1) + "s");
+        s.style.setProperty("--dx", rnd(-60, 60).toFixed(0) + "px");
+        s.style.setProperty("--col", cols[k % 4]);
+        notes.appendChild(s);
+      }
+      var wall = document.getElementById("eqwall");
+      for (var b = 0; b < 30; b++) {
+        var bar = document.createElement("i");
+        bar.style.setProperty("--h", rnd(45, 100).toFixed(0) + "%");
+        bar.style.setProperty("--dl", (-rnd(0, 1.5)).toFixed(2) + "s");
+        wall.appendChild(bar);
+      }
+    }
+
+    /* ----- the tape: one path that winds through the whole page ----- */
+    var book = document.getElementById("book"), ribbon = document.getElementById("ribbon");
+    var pGlow = document.getElementById("pGlow"), pBase = document.getElementById("pBase"), pSheen = document.getElementById("pSheen");
+    var pPlay = document.getElementById("pPlay"), pPlaySheen = document.getElementById("pPlaySheen"), head = document.getElementById("head");
+    var samples = [], pathLen = 0;
+
+    function f(n) { return Math.round(n * 10) / 10; }
+    function down(x, y1, y2, amp) {   // a gently wobbling vertical run
+      var d = y2 - y1;
+      return " C" + f(x + amp) + " " + f(y1 + d * 0.33) + " " + f(x - amp) + " " + f(y1 + d * 0.66) + " " + f(x) + " " + f(y2);
+    }
+    function loop(x, y, r, dir) {      // a full curl of tape, bulging toward the photo (dir -1 = left, +1 = right)
+      var sweep = dir < 0 ? 1 : 0, ry = r * 1.18;
+      return " A" + f(r) + " " + f(ry) + " 0 1 " + sweep + " " + f(x + dir * 2 * r) + " " + f(y) +
+             " A" + f(r) + " " + f(ry) + " 0 1 " + sweep + " " + f(x) + " " + f(y);
+    }
+
+    function buildTape() {
+      var bk = book.getBoundingClientRect();
+      var W = book.offsetWidth, H = book.offsetHeight;
+      var cs = getComputedStyle(book), L = parseFloat(cs.paddingLeft), R = W - parseFloat(cs.paddingRight);
+      ribbon.setAttribute("width", W); ribbon.setAttribute("height", H); ribbon.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+      var cas = document.getElementById("cassette").getBoundingClientRect();
+      var sx = cas.left - bk.left + cas.width / 2, sy = cas.bottom - bk.top - 18;
+
+      var d = "M" + f(sx) + " " + f(sy), px = sx, py = sy;
+      tracks.forEach(function (t, i) {
+        var col = t.querySelector(".col"), cr = col.getBoundingClientRect();
+        var ty0 = cr.top - bk.top, ty1 = cr.bottom - bk.top;
+        var isL = t.classList.contains("L");
+        var gutter = isL ? (R - (cr.right - bk.left)) : ((cr.left - bk.left) - L);
+        var gx = isL ? R - gutter / 2 : L + gutter / 2;
+        var dir = isL ? -1 : 1;
+        var r1 = Math.min(32, Math.max(22, gutter * 0.62)), r2 = r1 * 0.62, amp = Math.max(4, gutter * 0.2);
+        var sl = t.querySelector(".sleeve");
+        var sy1 = ty0 + sl.offsetTop + sl.offsetHeight * 0.28;
+        var sy2 = ty1 - r2 * 2.4 - 24;
+
+        // swoop from where we were to this lane
+        var entryY = ty0 - 6, midY = py + (entryY - py) * 0.5;
+        d += " C" + f(px) + " " + f(midY) + " " + f(gx) + " " + f(midY) + " " + f(gx) + " " + f(entryY);
+        d += down(gx, entryY, sy1, amp);
+        d += loop(gx, sy1, r1, dir);
+        d += down(gx, sy1, sy2, amp);
+        d += loop(gx, sy2, r2, dir);
+        d += down(gx, sy2, ty1 + 6, amp);
+        px = gx; py = ty1 + 6;
+      });
+
+      // end at the Year Five button
+      var bt = document.getElementById("nextBtn").getBoundingClientRect();
+      var ex = bt.left - bk.left + bt.width / 2, ey = bt.top - bk.top - 4;
+      var mid = py + (ey - py) * 0.5;
+      d += " C" + f(px) + " " + f(mid) + " " + f(ex) + " " + f(mid) + " " + f(ex) + " " + f(ey);
+
+      [pGlow, pBase, pSheen, pPlay, pPlaySheen].forEach(function (p) { p.setAttribute("d", d); });
+      pathLen = pBase.getTotalLength();
+
+      // sample the path so scroll position can be mapped to a spot on the tape
+      samples = [];
+      var N = Math.min(900, Math.max(120, Math.ceil(pathLen / 6))), maxY = -1;
+      for (var s = 0; s <= N; s++) {
+        var len = pathLen * s / N, pt = pBase.getPointAtLength(len);
+        maxY = Math.max(maxY, pt.y);
+        samples.push({ len: len, x: pt.x, y: pt.y, my: maxY });
+      }
+      pPlay.style.strokeDasharray = pPlaySheen.style.strokeDasharray = "0 " + pathLen;
+      playTape();
+    }
+
+    function playTape() {
+      if (!samples.length) return;
+      var bookTop = book.getBoundingClientRect().top + window.scrollY;
+      var target = window.scrollY + window.innerHeight * 0.55 - bookTop;
+      var lo = 0, hi = samples.length - 1;
+      while (lo < hi) { var m = (lo + hi) >> 1; if (samples[m].my >= target) hi = m; else lo = m + 1; }
+      var sp = samples[lo], len = target <= samples[0].y ? 0 : sp.len;
+      var dash = f(len) + " " + f(pathLen);
+      pPlay.style.strokeDasharray = pPlaySheen.style.strokeDasharray = dash;
+      if (len > 4 && len < pathLen - 2) {
+        head.style.display = "";
+        head.setAttribute("transform", "translate(" + f(sp.x) + " " + f(sp.y) + ")");
+      } else {
+        head.style.display = "none";
+      }
+    }
+
+    var tapeQueued = false;
+    function queueTape() { if (!tapeQueued) { tapeQueued = true; requestAnimationFrame(function () { tapeQueued = false; buildTape(); }); } }
+    queueTape();
+    window.addEventListener("load", queueTape);
+    window.addEventListener("resize", queueTape);
+    if (window.ResizeObserver) { new ResizeObserver(queueTape).observe(book); }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(queueTape); }
+    [].slice.call(document.images).forEach(function (im) { if (!im.complete) im.addEventListener("load", queueTape); });
+
+    /* ----- reveal each track, show it on the deck ----- */
+    var nowSide = document.getElementById("nowSide"), nowTrack = document.getElementById("nowTrack");
+    if ("IntersectionObserver" in window) {
+      root.classList.add("js");
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add("on");
+            nowSide.textContent = "Side " + e.target.dataset.side;
+            nowTrack.textContent = "Track " + pad(+e.target.dataset.n) + " / " + pad(tracks.length);
+          }
+        });
+      }, { threshold: 0.25 });
+      tracks.forEach(function (t) { io.observe(t); });
+    } else {
+      tracks.forEach(function (t) { t.classList.add("on"); });
+    }
+
+    /* ----- scrolling: reels, clock, vinyl and the playhead ----- */
+    var clock = document.getElementById("clock"), ticking = false;
+    function update() {
+      ticking = false;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.max(0, Math.min(1, window.scrollY / max)) : 0;
+      root.style.setProperty("--p", p.toFixed(4));
+      var s = Math.round(p * total);
+      clock.textContent = Math.floor(s / 60) + ":" + pad(s % 60);
+      playTape();
+    }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("load", update);
+    update();
+
+    /* ----- videos: tap to play with sound, one at a time ----- */
+    var vids = [].slice.call(document.querySelectorAll("[data-video]"));
+    vids.forEach(function (bx) {
+      var v = bx.querySelector("video"), btn = bx.querySelector(".play");
+      function start() {
+        vids.forEach(function (o) { var ov = o.querySelector("video"); if (ov !== v && !ov.paused) ov.pause(); });
+        v.muted = false;
+        var pr = v.play();
+        if (pr && pr.catch) pr.catch(function () { v.muted = true; v.play(); });
+      }
+      btn.addEventListener("click", start);
+      v.addEventListener("click", function () { if (v.paused) start(); else v.pause(); });
+      v.addEventListener("play", function () { bx.classList.add("playing"); });
+      v.addEventListener("pause", function () { bx.classList.remove("playing"); });
+      v.addEventListener("ended", function () { bx.classList.remove("playing"); v.currentTime = 0; });
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting && !v.paused) v.pause(); }); }, { threshold: 0.2 }).observe(bx);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
