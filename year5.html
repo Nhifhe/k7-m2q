@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#230912">
+<title>Nifemi | Year Five</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cinzel:wght@500;700&family=Courier+Prime:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .6s; }
+
+  :root {
+    --wine: #3A0F1C;
+    --wine-deep: #230912;
+    --crimson: #A60F2D;
+    --crimson-dk: #7C0A20;
+    --gold: #C9A24A;
+    --gold-lt: #F3D68A;
+    --gold-dk: #8E6A1C;
+    --cream: #F4EBDD;
+    --ink: #2B1D08;
+    --display: "Fraunces", Georgia, serif;
+    --engrave: "Cinzel", "Times New Roman", serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+    --mono: "Courier Prime", "Courier New", monospace;
+    --p: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; background: var(--wine-deep); }
+
+  body {
+    min-height: 100vh;
+    color: var(--cream);
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* ===== the gallery wall ===== */
+  .bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+    background: radial-gradient(ellipse 90% 60% at 50% 0%, #5E1A2E 0%, #3A0F1C 55%, #230912 100%); }
+  .bg::before { content: ""; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(45deg, rgba(243,214,138,.05) 0 1.5px, transparent 1.5px 26px),
+      repeating-linear-gradient(-45deg, rgba(243,214,138,.05) 0 1.5px, transparent 1.5px 26px); }
+  .bg::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(10,2,6,.7) 100%); }
+  .dust i { position: absolute; bottom: -4vh; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%;
+    background: rgba(255,226,150,.8); box-shadow: 0 0 8px rgba(255,226,150,.8); opacity: 0;
+    animation: mote var(--d) ease-in-out var(--delay) infinite; }
+  @keyframes mote {
+    0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+    15%  { opacity: .75; }
+    60%  { opacity: .5; }
+    100% { transform: translate3d(var(--dx), -105vh, 0); opacity: 0; }
+  }
+
+  /* ===== audio guide bar ===== */
+  .guide { position: sticky; top: 0; z-index: 10; padding: calc(.55rem + env(safe-area-inset-top)) 1rem .6rem;
+    background: rgba(35,9,18,.92); border-bottom: 1px solid rgba(201,162,74,.45);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .guide-row { max-width: 32rem; margin: 0 auto; display: flex; align-items: center; gap: .75rem; }
+  .plate { padding: .22rem .6rem; border-radius: .25rem; background: linear-gradient(135deg, var(--gold-lt), var(--gold-dk)); color: var(--ink);
+    font: 700 .68rem var(--engrave); letter-spacing: .14em; text-transform: uppercase; }
+  .now { flex: 1; font: 700 .72rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold-lt); }
+  .rooms { display: flex; gap: .35rem; }
+  .rooms i { width: .6rem; height: .6rem; border-radius: 50%; border: 2px solid rgba(201,162,74,.6); transition: background .4s, box-shadow .4s; }
+  .rooms i.seen { background: var(--gold); border-color: var(--gold); }
+  .rooms i.here { background: var(--gold-lt); border-color: var(--gold-lt); box-shadow: 0 0 8px var(--gold-lt); }
+
+  .book { position: relative; max-width: 32rem; margin: 0 auto; padding: 2rem 1.1rem calc(4rem + env(safe-area-inset-bottom)); }
+  .cover, #rooms, .close { position: relative; z-index: 1; }
+
+  /* ===== the red carpet that unrolls as she walks ===== */
+  .carpet { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; overflow: visible; }
+  .carpet path { fill: none; stroke-linecap: butt; stroke-linejoin: round; }
+  .c-guide  { stroke: rgba(243,214,138,.45); stroke-width: 2; stroke-dasharray: 2 10; stroke-linecap: round; }
+  .c-shadow { stroke: rgba(0,0,0,.4); stroke-width: 52; }
+  .c-gold   { stroke: var(--gold); stroke-width: 46; }
+  .c-body   { stroke: var(--crimson); stroke-width: 40; }
+  .c-center { stroke: var(--crimson-dk); stroke-width: 26; }
+  .c-line   { stroke: rgba(243,214,138,.8); stroke-width: 2.5; }
+  .roll-body { fill: var(--crimson); stroke: var(--gold); stroke-width: 3; }
+  .roll-ring { fill: none; stroke: var(--crimson-dk); stroke-width: 3; }
+  .roll-core { fill: var(--gold-lt); }
+
+  /* ===== cover: a theatre marquee ===== */
+  .cover { text-align: center; padding: .6rem 0 3.4rem; }
+  .stamp { display: inline-block; padding: .3rem .8rem; border: 2px solid var(--gold); border-radius: .3rem; color: var(--gold);
+    font: 700 .78rem var(--mono); letter-spacing: .18em; text-transform: uppercase; transform: rotate(-3deg); }
+  .marquee { position: relative; margin: 1.3rem 0 1.2rem; padding: 1.5rem .8rem 1.4rem; background: linear-gradient(180deg, #1c070d, #2a0c15);
+    border: 6px solid var(--gold); border-radius: .7rem; box-shadow: 0 0 0 2px var(--gold-dk), 0 0 34px rgba(243,214,138,.35), 0 20px 36px rgba(0,0,0,.55); }
+  .bulbs { position: absolute; left: 6px; right: 6px; display: flex; justify-content: space-between; }
+  .bulbs.top { top: -.62rem; } .bulbs.bot { bottom: -.62rem; }
+  .bulbs i { width: .55rem; height: .55rem; border-radius: 50%; background: #FFE9A8; box-shadow: 0 0 8px 2px rgba(255,226,150,.9); animation: chase 1.2s steps(1) infinite; }
+  .bulbs i:nth-child(even) { animation-delay: .6s; }
+  @keyframes chase { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .25; } }
+  .now-showing { font: 700 .8rem var(--engrave); letter-spacing: .4em; text-transform: uppercase; color: var(--gold-lt); }
+  h1 { margin: .5rem 0 .2rem; font: 700 clamp(3.2rem, 15vw, 4.4rem)/1 var(--engrave); letter-spacing: .02em;
+    background: linear-gradient(180deg, #FFF0B8, #C9A24A 55%, #8E6A1C); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,.4)); }
+  .sub { font: 500 .95rem var(--engrave); letter-spacing: .28em; text-transform: uppercase; color: var(--cream); opacity: .9; }
+  .admit { display: inline-block; margin-top: .4rem; padding: .35rem 1.1rem; border: 2px dashed rgba(243,214,138,.6); border-radius: .3rem;
+    font: 700 .78rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-lt); transform: rotate(1.5deg); }
+  .intro { margin: 1.5rem auto 0; max-width: 18rem; font: 700 1.8rem/1.15 var(--hand); color: var(--gold-lt); text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+  .down { margin-top: .5rem; color: var(--gold-lt); font-size: 1.5rem; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(6px); } }
+
+  /* ===== rooms: one exhibit each, hugging a side so the carpet has a lane ===== */
+  .room { position: relative; margin-bottom: 4.4rem; }
+  .col { position: relative; width: 82%; }
+  .room.L .col { margin-right: auto; }
+  .room.R .col { margin-left: auto; }
+
+  .tnum { font: 700 .72rem var(--engrave); letter-spacing: .3em; text-transform: uppercase; color: var(--gold); text-shadow: 0 1px 8px rgba(0,0,0,.7); }
+  .ttitle { margin: .2rem 0 .7rem; font: 700 1.35rem/1.2 var(--engrave); letter-spacing: .03em; color: var(--cream); text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+
+  .wallpiece { position: relative; padding-top: 1.7rem; }
+  .lamp { position: absolute; top: .5rem; left: 50%; width: 46%; height: .5rem; transform: translateX(-50%); z-index: 2;
+    border-radius: .3rem; background: linear-gradient(#F3D68A, #8E6A1C); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
+  .lamp::before { content: ""; position: absolute; left: 50%; top: .45rem; width: 3px; height: .55rem; transform: translateX(-50%); background: var(--gold-dk); }
+  .beam { position: absolute; top: 1rem; left: -9%; right: -9%; bottom: -10%; z-index: 0; opacity: 0; transition: opacity 1.4s ease;
+    background: linear-gradient(180deg, rgba(255,226,150,.5), rgba(255,226,150,0) 85%);
+    clip-path: polygon(28% 0, 72% 0, 108% 100%, -8% 100%); }
+  .room.on .beam { opacity: 1; }
+
+  .frame { position: relative; z-index: 1; padding: .55rem; border-radius: .25rem;
+    background: linear-gradient(135deg, #F3D68A, #B98A2E 38%, #EBCB78 58%, #8E6A1C);
+    box-shadow: 0 20px 34px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.28); }
+  .frame::before { content: ""; position: absolute; inset: .3rem; border: 2px solid rgba(60,35,5,.5); border-radius: .15rem; pointer-events: none; }
+  .mat { padding: .6rem; background: var(--cream); box-shadow: inset 0 0 10px rgba(0,0,0,.45); }
+  .art { position: relative; aspect-ratio: var(--ar, 3 / 4); background: #1e0a10; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+  .art img, .art video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .strip { display: grid; gap: .45rem; }
+  .strip .cell { position: relative; aspect-ratio: var(--ar, 5 / 4); background: #1e0a10; overflow: hidden; }
+  .strip .cell img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .strip.mosaic { grid-template-columns: 1fr 1fr; }
+  .strip.mosaic .cell:first-child { grid-column: 1 / -1; }
+  .zoom { cursor: zoom-in; }
+  .cell.vid { position: relative; }
+  .statement { position: relative; z-index: 1; margin: -.4rem 0 3.4rem; padding: 1.2rem 1.2rem 1.3rem; text-align: center; font-style: italic; font-size: 1.1rem; color: var(--ink);
+    background: rgba(244,235,221,.96); border-top: 4px solid var(--gold); border-radius: .3rem; box-shadow: 0 12px 24px rgba(0,0,0,.45); text-wrap: pretty; }
+  .statement b { display: block; margin-bottom: .35rem; font: 700 .7rem var(--engrave); letter-spacing: .28em; text-transform: uppercase; font-style: normal; color: var(--gold-dk); }
+  .secret { position: relative; font-weight: 700; color: var(--crimson-dk); text-decoration: underline dotted var(--crimson); text-decoration-thickness: 2px; text-underline-offset: 3px; cursor: help; white-space: nowrap; }
+  .reveal { position: absolute; left: 50%; z-index: 6; width: max-content; max-width: calc(100% - 1rem); padding: .55rem .8rem; border-radius: .4rem; text-align: center;
+    background: var(--ink); color: var(--gold-lt); font: italic 500 1rem/1.35 var(--serif); box-shadow: 0 8px 18px rgba(0,0,0,.5);
+    opacity: 0; pointer-events: none; transform: translate(-50%, -100%) translateY(6px); transition: opacity .25s ease, transform .25s ease; }
+  .reveal.show { opacity: 1; transform: translate(-50%, -100%); }
+  .lb { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 1rem; background: rgba(12,3,8,.94); cursor: zoom-out; }
+  .lb[hidden] { display: none; }
+  .lb img { max-width: 96vw; max-height: 88vh; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,.7); }
+  .lb span { position: absolute; top: calc(.8rem + env(safe-area-inset-top)); right: 1rem; color: var(--gold-lt); font: 700 .8rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center;
+    background: repeating-linear-gradient(135deg, #4a1424 0 12px, #3A0F1C 12px 24px); color: var(--gold-lt); font: 700 .78rem var(--mono); letter-spacing: .08em; }
+
+  .play { position: absolute; inset: 0; display: grid; place-items: center; border: 0; color: #fff; cursor: pointer;
+    background: linear-gradient(180deg, transparent 50%, rgba(35,9,18,.75)); transition: opacity .3s; }
+  .play i { display: grid; place-items: center; width: 3.8rem; height: 3.8rem; border-radius: 50%; background: var(--crimson);
+    box-shadow: 0 0 0 4px rgba(243,214,138,.95), 0 10px 24px rgba(0,0,0,.5); }
+  .play i::before { content: ""; margin-left: .3rem; border-left: 1rem solid #fff; border-top: .62rem solid transparent; border-bottom: .62rem solid transparent; }
+  .play span { position: absolute; left: 0; right: 0; bottom: .8rem; font: 700 1.3rem var(--hand); text-shadow: 0 1px 6px rgba(0,0,0,.7); }
+  .vid.playing .play { opacity: 0; pointer-events: none; }
+
+  /* brass plaque = the receipt */
+  .plaque { position: relative; z-index: 1; width: 88%; margin: .95rem auto 0; padding: .75rem 1rem .85rem; border-radius: .2rem; color: var(--ink);
+    background: linear-gradient(135deg, #E8CC85, #B98A2E 45%, #EBCB78 70%, #A27C2A);
+    box-shadow: 0 8px 14px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 0 0 4px rgba(120,80,10,.25);
+    font: 700 .76rem/1.5 var(--mono); text-shadow: 0 1px 0 rgba(255,255,255,.4); }
+  .plaque::before, .plaque::after { content: ""; position: absolute; top: .4rem; width: .38rem; height: .38rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4cc, #6e4e12); }
+  .plaque::before { left: .4rem; } .plaque::after { right: .4rem; }
+  .plaque .pn { text-align: center; letter-spacing: .16em; text-transform: uppercase; font-size: .72rem; font-family: var(--engrave); }
+  .plaque .pc { text-align: center; margin: .15rem 0 .45rem; padding-bottom: .4rem; border-bottom: 1px solid rgba(60,35,5,.45); font: italic 600 1rem var(--serif); text-shadow: 0 1px 0 rgba(255,255,255,.4); }
+  .plaque div.r { display: flex; justify-content: space-between; gap: .7rem; }
+  .plaque div.r span:first-child { text-transform: uppercase; opacity: .65; flex: none; }
+  .plaque div.r span:last-child { text-align: right; }
+
+  .note { position: relative; z-index: 1; margin-top: 1.1rem; padding: .95rem 1.05rem; font-size: 1.08rem; line-height: 1.55; color: var(--ink);
+    background: var(--cream); border-radius: .3rem; border-left: 4px solid var(--gold); box-shadow: 0 10px 22px rgba(0,0,0,.45); text-wrap: pretty; }
+  .note b { display: block; margin-bottom: .2rem; font: 700 .7rem var(--engrave); letter-spacing: .24em; text-transform: uppercase; color: var(--gold-dk); }
+
+  .js .frame, .js .plaque, .js .note { opacity: 0; transition: opacity .8s ease, transform .9s cubic-bezier(.2,1.1,.4,1); }
+  .js .frame  { transform: translateY(-18px) scale(.97); }
+  .js .plaque { transform: translateY(14px); transition-delay: .25s; }
+  .js .note   { transform: translateY(14px); transition-delay: .4s; }
+  .js .room.on .frame, .js .room.on .plaque, .js .room.on .note { opacity: 1; transform: none; }
+
+  .wing { text-align: center; margin: 0 0 4.4rem; }
+  .wing .big { font: 700 1.9rem/1.1 var(--engrave); letter-spacing: .08em; text-transform: uppercase; color: var(--gold-lt); text-shadow: 0 3px 14px rgba(0,0,0,.7); }
+  .wing .hand { font: 700 1.6rem var(--hand); color: var(--cream); text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+
+  /* ===== the Forever Wing doors ===== */
+  .close { text-align: center; padding-top: 1.2rem; }
+  .close .big { font: 700 1.9rem/1.2 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+  .close .hand { margin: .4rem auto 1.6rem; max-width: 19rem; font: 700 1.85rem/1.1 var(--hand); color: var(--gold-lt); text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+  .doors { width: min(100%, 17rem); margin: 0 auto 1.6rem; }
+  .doors .sign { margin: 0 auto .5rem; width: 90%; padding: .4rem .6rem; border-radius: .25rem; font: 700 .85rem var(--engrave); letter-spacing: .22em; text-transform: uppercase; color: var(--ink);
+    background: linear-gradient(135deg, var(--gold-lt), var(--gold-dk)); box-shadow: 0 6px 12px rgba(0,0,0,.5); }
+  .doors .leafs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; height: 9.5rem; padding: .5rem .5rem 0; border-radius: 6rem 6rem 0 0 / 3.2rem 3.2rem 0 0;
+    background: linear-gradient(180deg, #1a0509, #2a0c15); box-shadow: 0 0 0 4px var(--gold), 0 0 28px rgba(243,214,138,.4), 0 14px 26px rgba(0,0,0,.6); }
+  .doors .leaf { position: relative; border-radius: 4rem 0 0 0 / 2.4rem 0 0 0; background: linear-gradient(180deg, #5a2a18, #3a1a10); box-shadow: inset 0 0 0 3px rgba(243,214,138,.55); }
+  .doors .leaf + .leaf { border-radius: 0 4rem 0 0 / 0 2.4rem 0 0; }
+  .doors .leaf::before { content: ""; position: absolute; top: 50%; width: .55rem; height: .55rem; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4cc, #8E6A1C); box-shadow: 0 0 6px rgba(243,214,138,.8); }
+  .doors .leaf:first-child::before { right: .6rem; } .doors .leaf + .leaf::before { left: .6rem; }
+  .doors .leaf::after { content: ""; position: absolute; inset: 1rem .9rem 1.4rem; border: 2px solid rgba(243,214,138,.35); border-radius: 2.5rem 0 0 0; }
+  .doors .leaf + .leaf::after { border-radius: 0 2.5rem 0 0; }
+
+  .go { position: relative; display: inline-block; padding: .95rem 2.2rem; border-radius: 999px; background: linear-gradient(180deg, #C41538, var(--crimson)); color: #fff; text-decoration: none;
+    font: 700 1rem var(--engrave); letter-spacing: .08em; box-shadow: 0 0 0 3px var(--gold), 0 0 0 7px rgba(201,162,74,.3), 0 10px 20px rgba(0,0,0,.5); transition: transform .15s, box-shadow .15s; }
+  .go:active { transform: scale(.96); }
+  .books { display: flex; justify-content: center; gap: .6rem; margin-top: 2rem; }
+  .books i { width: .75rem; height: .75rem; border-radius: 50%; border: 2px solid rgba(243,214,138,.6); }
+  .books i.done { background: var(--gold); border-color: var(--gold); }
+  .books-note { margin-top: .5rem; font: 500 1.25rem var(--hand); color: var(--cream); opacity: .9; }
+
+  :focus-visible { outline: 3px solid var(--gold-lt); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bulbs i, .down, .dust i { animation: none; }
+    .dust { display: none; }
+    .js .frame, .js .plaque, .js .note, .beam { transition: none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"><div class="dust" id="dust"></div></div>
+
+<div class="guide" aria-hidden="true">
+  <div class="guide-row">
+    <span class="plate">Audio guide</span>
+    <span class="now" id="now">Room 01</span>
+    <div class="rooms" id="roomDots"></div>
+  </div>
+</div>
+
+<div class="lb" id="lb" hidden><span>tap to close</span><img alt=""></div>
+
+<main class="book" id="book">
+
+  <svg class="carpet" id="carpet" aria-hidden="true">
+    <path class="c-guide" id="cGuide"/>
+    <path class="c-shadow" id="cShadow"/>
+    <path class="c-gold" id="cGold"/>
+    <path class="c-body" id="cBody"/>
+    <path class="c-center" id="cCenter"/>
+    <path class="c-line" id="cLine"/>
+    <g id="roll" style="display:none"><circle class="roll-body" r="17"/><circle class="roll-ring" r="10"/><circle class="roll-core" r="4"/></g>
+  </svg>
+
+  <header class="cover">
+    <span class="stamp">Receipt book &middot; 5 of 5</span>
+    <div class="marquee">
+      <div class="bulbs top" id="bulbsT"></div>
+      <p class="now-showing">Now showing</p>
+      <h1>Year Five</h1>
+      <p class="sub">The Final Exhibition</p>
+      <div class="bulbs bot" id="bulbsB"></div>
+    </div>
+    <span class="admit">Admit one &middot; Ife</span>
+    <p class="intro">Mind the carpet. It follows you.</p>
+    <p class="down" aria-hidden="true">&#8595;</p>
+  </header>
+
+  <section class="statement">
+    <b>Artist's statement</b>
+    We began the year with a promise: go out more, and fit in as many dates as we could. We never did make it to extraordinary. That is the thing about the woman I love; extraordinary was never the place. It is simply the time we get to spend together, and the memories made in between.
+  </section>
+
+  <section id="rooms"></section>
+
+  <footer class="close">
+    <p class="big">Year Five, closed.</p>
+    <p class="hand">One room left. It is the one that matters most.</p>
+    <div class="doors" id="doors">
+      <div class="sign">The Forever Wing</div>
+      <div class="leafs"><span class="leaf"></span><span class="leaf"></span></div>
+    </div>
+    <a class="go" id="nextBtn" href="finale.html">Enter the Forever Wing</a>
+    <div class="books" role="img" aria-label="Receipt book 5 of 5"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i></div>
+    <p class="books-note">5 of 5 receipt books</p>
+  </footer>
+</main>
+
+<script>
+  /* ================= EDIT HERE =================
+     One entry per exhibit: photo, strip (several photos), or video with poster.
+     Leave photo empty to show a "photo goes here" placeholder. */
+  const EXHIBITS = [
+    { title: "Taking the Basquiat to the Gallery", cap: "The first date of the year",
+      items: [
+        { src: "y5-01a.webp", ar: "3 / 4", alt: "Her smiling in front of a huge blue and white Eyo painting, beside a metal sculpture" },
+        { src: "y5-01b.webp", ar: "3 / 4", alt: "Her from behind, photographing a painting of Lagos at dusk with its bridge lit up" },
+        { src: "y5-01c.webp", ar: "3 / 4", alt: "Her bursting into a smile, surrounded by colourful paintings" }
+      ],
+      rows: [["Item", "One art gallery date"], ["Venue", "Nike Art Gallery"], ["Month", "January"]],
+      story: "The first date of the year, and a perfect one for a promise to go out more. We went to see art, and I captioned the visit \"Taking the Basquiat to the gallery\", in reference to the beautiful woman right beside me. Sadly there is no picture with both of us in the frame, but who is counting when the absolute love of my life is in it? Here you are beside an Eyo painting, photographing a painting of busy Lagos, and bursting into laughter among the art." },
+
+    { title: "Player Two", cap: "Press start",
+      items: [
+        { video: "y5-02a.mp4", poster: "y5-02a-poster.webp", ar: "9 / 16", alt: "A video of the two of us on the electric train in Lagos, goofing around on the way to the mall" },
+        { src: "y5-02b.webp", ar: "3 / 4", alt: "The two of us side by side at a video game arcade, both flashing peace signs" }
+      ],
+      rows: [["Item", "One arcade date"], ["Transport", "The electric train"], ["Score", "Unrecorded; too busy goofing"]],
+      story: "A Valentine's-season date, if memory serves: first the electric train across Lagos to the mall, goofy as usual, then an arcade full of games. We goofed around a lot, and I learned one thing from a date for two: you need a third wheel, and that third wheel is a photographer! So all we have is this one picture, side by side with our peace signs, and honestly, it is enough." },
+
+    { title: "I Found Her", cap: "Breathtaking, on repeat",
+      items: [
+        { video: "y5-03.mp4", poster: "y5-03-poster.webp", ar: "9 / 16", alt: "A video she sent me of herself outdoors, with red braids and a black top, looking breathtaking" }
+      ],
+      rows: [["Item", "One video, sent by her"], ["Replays", "Too many to count"], ["Soundtrack", "Her, by Jyke"]],
+      story: "Every year we get our usual extraordinarily beautiful picture of you; this time it came as a video you sent me, and it took my breath away. I watched it so many times that if a video could show wear and tear, this one would look like something used for a hundred years. You looked simply breathtaking, and all I could think of was Jyke's song, Her, and the line in the chorus that says \"I found her\", after running for so many miles. I found her." },
+
+    { title: "The Odyssey", cap: "Stealing glances",
+      items: [
+        { src: "y5-04.webp", ar: "3 / 4", alt: "In black and white, her looking up at me with a huge smile while I look down at her, at the cinema" }
+      ],
+      rows: [["Item", "Two tickets"], ["Occasion", "National Cinema Day"], ["Dress code", "One unforgettable sunflower dress"]],
+      story: "A couple of weeks before the picnic, we went to the cinema to see The Odyssey on National Cinema Day. You wore a stunning sunflower dress that I simply could not look away from. In this photo you are looking up at me, smiling; but the truth is that on the day itself, it was me stealing glances at you, smiling." },
+
+    { title: "Two Birthdays, One Blanket", cap: "Cakes, chops and beaming smiles",
+      items: [
+        { video: "y5-05a.mp4", poster: "y5-05a-poster.webp", ar: "9 / 16", alt: "A short clip of the two of us in the car on the way to our birthday picnic" },
+        { src: "y5-05b.webp", ar: "3 / 4", alt: "The two of us in white on a picnic blanket in a park, with food in front of us and big smiles" }
+      ],
+      rows: [["Item", "One picnic for two"], ["Birthdays", "Four days apart"], ["Menu", "Everything we could think of"]],
+      story: "Our birthdays are four days apart; mine fell on a Tuesday and yours on a Saturday, so we gave ourselves one picnic, all on our own, on your day. Food, drinks, novels, mats, cakes, chops, fruits, everything we could think of for a picnic for two. The clip is from the car on the way there, a few seconds to show how excited we were. And the photo: both of us in white, a park behind us, snacks in front of us, and smiles as wide as the blanket." },
+
+    { title: "Escape Plan: Tarkwa Bay", cap: "The city noise can wait",
+      items: [
+        { video: "y5-06a.mp4", poster: "y5-06a-poster.webp", ar: "9 / 16", alt: "A video from the beach hut, the two of us gisting and goofing around when we arrived" },
+        { src: "y5-06b.webp", ar: "16 / 9", alt: "A black and white selfie of the two of us, with the words don't be perfect, be real" }
+      ],
+      rows: [["Item", "Two days at the beach"], ["Transport", "A canoe, with an engine"], ["Lodging", "Tents, facing the waves"]],
+      story: "We just woke up one day and decided to escape the city noise for a bit. We took a boat to Tarkwa Bay, the canoe-shaped kind with a fuel engine instead of a paddle, and spent two days there, sleeping in tents pitched facing the waves and shaded by little thatch huts. These are from when we arrived: gisting, goofing around, and one black and white selfie that says it all: don't be perfect, be real." },
+
+    { title: "Tents and Tides", cap: "Evening, then morning",
+      items: [
+        { src: "y5-07a.webp", ar: "3 / 4", alt: "In black and white, her at the beach looking back at the camera with the waves behind her" },
+        { src: "y5-07b.webp", ar: "1449 / 2576", alt: "A collage from the beach: a kiss from me, a kiss back from her, our names written in the sand, and the two of us in the evening and the next morning" }
+      ],
+      rows: [["Item", "One portrait, one collage"], ["Sand writing", "Our names"], ["Weather", "Moody, and perfect"]],
+      story: "The collage says it best: a peck from me at the top, a peck from you in return at the bottom, our names written in the sand, and the two of us in the evening and again the next morning. And this one is my favourite of the trip: you, looking back at the camera, the waves behind you like they had been hired for it." },
+
+    { title: "Matching, Reluctantly", cap: "White tees and adire pants", layout: "mosaic",
+      items: [
+        { src: "y5-08a.webp", ar: "3 / 4", alt: "The two of us laughing at a couples picnic, in white tees and matching adire pants" },
+        { src: "y5-08b.webp", ar: "3 / 4", alt: "The two of us standing close, her arms crossed and both smiling" },
+        { src: "y5-08c.webp", ar: "3 / 4", alt: "Me laughing out loud with her smiling beside me" },
+        { src: "y5-08d.webp", ar: "3 / 4", alt: "Another goofy pose, the two of us standing together under the trees" },
+        { src: "y5-08e.webp", ar: "3 / 4", alt: "Me adjusting my sunglasses while she laughs beside me" }
+      ],
+      rows: [["Item", "One couples picnic"], ["Dress code", "White tees, adire pants"], ["Complaints", "Loud, and entirely fake"]],
+      story: "A mutual friend invited us to a couples picnic, and we decided to honour the invitation, so we went dressed as a couple: white tees and adire pants. I complained loudly about being forced into the same theme as you, and about moving around Lagos looking like a couple. But here is <span class=\"secret\" tabindex=\"0\" role=\"button\" aria-label=\"A secret. Tap to reveal.\" data-secret=\"I love looking alike with her. A lot. (Please do not tell her I said so.)\">a secret</span> nobody knows. These five goofy, cute photos are our most recent ones, and what a great time it was." }
+  ];
+  const WING_AFTER = 4;   // the "Second Gallery" sign appears after this many exhibits
+  /* ============================================= */
+
+  (function () {
+    var root = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var rnd = function (a, b) { return a + Math.random() * (b - a); };
+
+    /* marquee bulbs */
+    ["bulbsT", "bulbsB"].forEach(function (id) {
+      var box = document.getElementById(id), h = "";
+      for (var i = 0; i < 13; i++) h += "<i></i>";
+      box.innerHTML = h;
+    });
+
+    /* ----- build the rooms ----- */
+    var out = "", dots = "";
+    EXHIBITS.forEach(function (t, i) {
+      var n = i + 1, lane = n % 2 === 1 ? "L" : "R";
+      dots += "<i></i>";
+      if (n === WING_AFTER + 1) {
+        out += '<div class="wing"><div class="big">Second Gallery</div><div class="hand">Watch your step</div></div>';
+      }
+      var media;
+      if (t.items) {
+        media = '<div class="strip' + (t.layout === "mosaic" ? " mosaic" : "") + '">' + t.items.map(function (it) {
+          if (it.video) {
+            return '<div class="cell vid" style="--ar:' + (it.ar || "9 / 16") + '" data-video><video src="' + it.video + '" poster="' + (it.poster || "") + '" playsinline preload="metadata" aria-label="' + it.alt + '"></video>' +
+                   '<button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button></div>';
+          }
+          return '<div class="cell zoom" style="--ar:' + it.ar + '"><img src="' + it.src + '" alt="' + it.alt + '" loading="lazy" decoding="async"></div>';
+        }).join("") + '</div>';
+      } else if (t.strip) {
+        media = '<div class="strip">' + t.strip.map(function (fr) {
+          return '<div class="cell" style="--ar:' + fr.ar + '"><img src="' + fr.src + '" alt="' + fr.alt + '" loading="lazy" decoding="async"></div>';
+        }).join("") + '</div>';
+      } else if (t.video) {
+        media = '<div class="art vid" style="--ar:' + (t.ar || "3 / 5") + '" data-video><video src="' + t.video + '" poster="' + (t.poster || "") + '" playsinline preload="metadata" aria-label="' + t.alt + '"></video>' +
+                '<button class="play" type="button" aria-label="Play the video, with sound"><i></i><span>tap to play, sound on</span></button></div>';
+      } else {
+        media = '<div class="art" style="--ar:' + (t.ar || "3 / 4") + '">' +
+                (t.photo ? '<img src="' + t.photo + '" alt="' + t.alt + '" loading="lazy" decoding="async" onerror="this.remove()">' : '') +
+                '<div class="ph" style="z-index:' + (t.photo ? "-1" : "0") + '">photo goes here<br>(' + (t.photo || "y5-" + pad(n) + ".webp") + ')</div></div>';
+      }
+      var rows = (t.rows || []).map(function (r) { return '<div class="r"><span>' + r[0] + "</span><span>" + r[1] + "</span></div>"; }).join("");
+      out += '<article class="room ' + lane + '" data-n="' + n + '"><div class="col">' +
+        '<div class="tnum">Exhibit ' + pad(n) + '</div>' +
+        '<h2 class="ttitle">' + t.title + '</h2>' +
+        '<div class="wallpiece"><span class="lamp"></span><span class="beam"></span><figure class="frame"><div class="mat">' + media + '</div></figure></div>' +
+        '<div class="plaque"><div class="pn">Receipt No. ' + pad(n) + '</div><div class="pc">&ldquo;' + t.cap + '&rdquo;</div>' + rows + '</div>' +
+        '<p class="note"><b>Curator\'s note</b>' + t.story + '</p></div></article>';
+    });
+    document.getElementById("rooms").innerHTML = out;
+    var dotBox = document.getElementById("roomDots");
+    dotBox.innerHTML = dots;
+    var dotEls = [].slice.call(dotBox.children);
+    var rooms = [].slice.call(document.querySelectorAll(".room"));
+
+    /* ----- drifting dust in the spotlights ----- */
+    if (!reduce) {
+      var dust = document.getElementById("dust");
+      for (var k = 0; k < 16; k++) {
+        var m = document.createElement("i");
+        m.style.setProperty("--x", rnd(3, 97).toFixed(1) + "%");
+        m.style.setProperty("--s", rnd(2, 4.5).toFixed(1) + "px");
+        m.style.setProperty("--d", rnd(14, 28).toFixed(1) + "s");
+        m.style.setProperty("--delay", (-rnd(0, 26)).toFixed(1) + "s");
+        m.style.setProperty("--dx", rnd(-50, 50).toFixed(0) + "px");
+        dust.appendChild(m);
+      }
+    }
+
+    /* ----- the carpet: one path through every room, unrolled by scrolling ----- */
+    var book = document.getElementById("book"), carpet = document.getElementById("carpet");
+    var ids = ["cGuide", "cShadow", "cGold", "cBody", "cCenter", "cLine"];
+    var P = {}; ids.forEach(function (id) { P[id] = document.getElementById(id); });
+    var roll = document.getElementById("roll");
+    var samples = [], pathLen = 0;
+    var unrolled = ["cShadow", "cGold", "cBody", "cCenter", "cLine"];
+
+    function f(n) { return Math.round(n * 10) / 10; }
+    function down(x, y1, y2, amp) {
+      var d = y2 - y1;
+      return " C" + f(x + amp) + " " + f(y1 + d * 0.33) + " " + f(x - amp) + " " + f(y1 + d * 0.66) + " " + f(x) + " " + f(y2);
+    }
+
+    function buildCarpet() {
+      var bk = book.getBoundingClientRect();
+      var W = book.offsetWidth, H = book.offsetHeight;
+      var cs = getComputedStyle(book), L = parseFloat(cs.paddingLeft), R = W - parseFloat(cs.paddingRight);
+      carpet.setAttribute("width", W); carpet.setAttribute("height", H); carpet.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+      var mq = document.querySelector(".marquee").getBoundingClientRect();
+      var sx = mq.left - bk.left + mq.width / 2, sy = mq.bottom - bk.top + 6;
+      var d = "M" + f(sx) + " " + f(sy), px = sx, py = sy;
+
+      rooms.forEach(function (rm) {
+        var col = rm.querySelector(".col"), cr = col.getBoundingClientRect();
+        var ty0 = cr.top - bk.top, ty1 = cr.bottom - bk.top;
+        var isL = rm.classList.contains("L");
+        var gutter = isL ? (R - (cr.right - bk.left)) : ((cr.left - bk.left) - L);
+        var gx = isL ? R - gutter / 2 : L + gutter / 2;
+        var amp = Math.max(3, gutter * 0.07);
+        var entryY = ty0 + 2, midY = py + (entryY - py) * 0.5;
+        d += " C" + f(px) + " " + f(midY) + " " + f(gx) + " " + f(midY) + " " + f(gx) + " " + f(entryY);
+        d += down(gx, entryY, ty1, amp);
+        px = gx; py = ty1;
+      });
+
+      var dr = document.querySelector("#doors .leafs").getBoundingClientRect();
+      var ex = dr.left - bk.left + dr.width / 2, ey = dr.bottom - bk.top - 2;
+      var mid = py + (ey - py) * 0.5;
+      d += " C" + f(px) + " " + f(mid) + " " + f(ex) + " " + f(mid) + " " + f(ex) + " " + f(ey);
+
+      ids.forEach(function (id) { P[id].setAttribute("d", d); });
+      pathLen = P.cBody.getTotalLength();
+
+      samples = [];
+      var N = Math.min(900, Math.max(120, Math.ceil(pathLen / 6))), maxY = -1;
+      for (var s = 0; s <= N; s++) {
+        var len = pathLen * s / N, pt = P.cBody.getPointAtLength(len);
+        maxY = Math.max(maxY, pt.y);
+        samples.push({ len: len, x: pt.x, y: pt.y, my: maxY });
+      }
+      unrolled.forEach(function (id) { P[id].style.strokeDasharray = "0 " + pathLen; });
+      walk();
+    }
+
+    function walk() {
+      if (!samples.length) return;
+      var bookTop = book.getBoundingClientRect().top + window.scrollY;
+      var target = window.scrollY + window.innerHeight * 0.6 - bookTop;
+      var lo = 0, hi = samples.length - 1;
+      while (lo < hi) { var m = (lo + hi) >> 1; if (samples[m].my >= target) hi = m; else lo = m + 1; }
+      var sp = samples[lo], len = target <= samples[0].y ? 0 : sp.len;
+      var dash = f(len) + " " + f(pathLen);
+      unrolled.forEach(function (id) { P[id].style.strokeDasharray = dash; });
+      if (len > 4 && len < pathLen - 2) {
+        roll.style.display = "";
+        roll.setAttribute("transform", "translate(" + f(sp.x) + " " + f(sp.y) + ") rotate(" + f(len * 2.2) + ")");
+      } else {
+        roll.style.display = "none";
+      }
+    }
+
+    var queued = false;
+    function queue() { if (!queued) { queued = true; requestAnimationFrame(function () { queued = false; buildCarpet(); }); } }
+    queue();
+    window.addEventListener("load", queue);
+    window.addEventListener("resize", queue);
+    if (window.ResizeObserver) { new ResizeObserver(queue).observe(book); }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(queue); }
+    [].slice.call(document.images).forEach(function (im) { if (!im.complete) im.addEventListener("load", queue); });
+
+    /* ----- turn on each spotlight as she arrives; the audio guide follows her ----- */
+    var now = document.getElementById("now");
+    function setHere(n) {
+      dotEls.forEach(function (d, i) { d.className = i + 1 < n ? "seen" : i + 1 === n ? "here" : ""; });
+      now.textContent = "Room " + pad(n) + " / " + pad(rooms.length);
+    }
+    setHere(1);
+    if ("IntersectionObserver" in window) {
+      root.classList.add("js");
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("on"); setHere(+e.target.dataset.n); }
+        });
+      }, { threshold: 0.3 });
+      rooms.forEach(function (r) { io.observe(r); });
+    } else {
+      rooms.forEach(function (r) { r.classList.add("on"); });
+    }
+
+    var ticking = false;
+    function update() { ticking = false; walk(); }
+    function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    /* ----- secrets: hover (or tap) to reveal ----- */
+    [].slice.call(document.querySelectorAll(".secret")).forEach(function (sec) {
+      var note = sec.closest(".note"), tip = document.createElement("span"), pinned = false;
+      tip.className = "reveal"; tip.textContent = sec.getAttribute("data-secret"); note.appendChild(tip);
+      function place() {
+        var a = sec.getBoundingClientRect(), n = note.getBoundingClientRect();
+        tip.style.top = (a.top - n.top - 8) + "px";
+      }
+      function show() { place(); tip.classList.add("show"); }
+      function hide() { if (!pinned) tip.classList.remove("show"); }
+      sec.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") show(); });
+      sec.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") hide(); });
+      sec.addEventListener("focus", show);
+      sec.addEventListener("blur", function () { pinned = false; tip.classList.remove("show"); });
+      sec.addEventListener("click", function () { pinned = !pinned; if (pinned) show(); else tip.classList.remove("show"); });
+      sec.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sec.click(); } });
+    });
+
+    /* ----- tap a photo to see it bigger ----- */
+    var lb = document.getElementById("lb"), lbImg = lb.querySelector("img");
+    document.addEventListener("click", function (e) {
+      var im = e.target.closest && e.target.closest(".zoom img");
+      if (im) { lbImg.src = im.currentSrc || im.src; lbImg.alt = im.alt; lb.hidden = false; }
+    });
+    lb.addEventListener("click", function () { lb.hidden = true; lbImg.removeAttribute("src"); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") lb.hidden = true; });
+
+    /* ----- videos: tap to play with sound, one at a time ----- */
+    var vids = [].slice.call(document.querySelectorAll("[data-video]"));
+    vids.forEach(function (bx) {
+      var v = bx.querySelector("video"), btn = bx.querySelector(".play");
+      function start() {
+        vids.forEach(function (o) { var ov = o.querySelector("video"); if (ov !== v && !ov.paused) ov.pause(); });
+        v.muted = false;
+        var pr = v.play();
+        if (pr && pr.catch) pr.catch(function () { v.muted = true; v.play(); });
+      }
+      btn.addEventListener("click", start);
+      v.addEventListener("click", function () { if (v.paused) start(); else v.pause(); });
+      v.addEventListener("play", function () { bx.classList.add("playing"); });
+      v.addEventListener("pause", function () { bx.classList.remove("playing"); });
+      v.addEventListener("ended", function () { bx.classList.remove("playing"); v.currentTime = 0; });
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting && !v.paused) v.pause(); }); }, { threshold: 0.2 }).observe(bx);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
