@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14050A">
+<title>Nifemi | The End</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&display=swap" rel="stylesheet">
+<style>
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .8s; }
+
+  :root {
+    --gold: #C9A24A;
+    --gold-lt: #F3D68A;
+    --gold-dk: #8E6A1C;
+    --crimson: #A60F2D;
+    --cream: #F4EBDD;
+    --display: "Fraunces", Georgia, serif;
+    --engrave: "Cinzel", "Times New Roman", serif;
+    --serif: "EB Garamond", Georgia, serif;
+    --hand: "Caveat", "Segoe Print", cursive;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #14050A; -webkit-text-size-adjust: 100%; }
+  body { min-height: 100vh; min-height: 100dvh; color: var(--cream); font-family: var(--serif); font-size: 1.2rem; line-height: 1.5; overflow: hidden; touch-action: manipulation; }
+
+  /* the stage and its single spotlight */
+  .stage { position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 55% at 50% 40%, #4a1426 0%, #240912 55%, #14050A 100%); }
+  .spot { position: absolute; left: 50%; top: -6vh; width: 130vmax; height: 120vh; margin-left: -65vmax; transform-origin: 50% 0; mix-blend-mode: screen;
+    background: conic-gradient(from 168deg at 50% 0%, transparent 0deg, rgba(255,226,150,.2) 12deg, transparent 24deg, transparent 360deg); }
+  .dust i { position: absolute; bottom: -4vh; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%;
+    background: rgba(255,226,150,.85); box-shadow: 0 0 8px rgba(255,226,150,.8); opacity: 0; animation: mote var(--d) ease-in-out var(--delay) infinite; }
+  @keyframes mote { 0% { transform: translate3d(0,0,0); opacity: 0; } 15% { opacity: .7; } 100% { transform: translate3d(var(--dx), -105vh, 0); opacity: 0; } }
+
+  /* what is said on stage, one line at a time */
+  .show { position: relative; z-index: 2; min-height: 100vh; min-height: 100dvh; display: grid; align-content: center; justify-items: center; gap: 1.4rem;
+    padding: 3.2rem 1.4rem calc(3rem + env(safe-area-inset-bottom)); text-align: center; }
+  .l { opacity: 0; transform: translateY(14px); animation: rise 1.3s ease forwards; animation-delay: var(--t); max-width: 22rem; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .l1 { font: 700 clamp(2rem, 9vw, 2.6rem)/1.15 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; }
+  .l2 { font: italic 500 1.3rem/1.4 var(--serif); }
+  .l3 { font: 600 .85rem var(--engrave); letter-spacing: .24em; text-transform: uppercase; color: var(--gold-lt); }
+  .l5 { font: 700 2rem/1.1 var(--hand); color: var(--gold-lt); text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+
+  .count { display: grid; gap: .5rem; justify-items: center; }
+  .count .lab { font: 700 .72rem var(--engrave); letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+  .clock { display: flex; gap: .55rem; }
+  .clock div { min-width: 3.6rem; padding: .45rem .3rem .35rem; border: 1px solid rgba(201,162,74,.6); border-radius: .35rem; background: rgba(20,5,10,.55); }
+  .clock b { display: block; font: 700 1.55rem/1 var(--display); font-variant-numeric: tabular-nums; color: var(--gold-lt); }
+  .clock small { display: block; margin-top: .2rem; font: 600 .55rem var(--engrave); letter-spacing: .18em; text-transform: uppercase; opacity: .75; }
+
+  /* the curtain falls */
+  .valance { position: fixed; top: 0; left: 0; right: 0; height: 2.6rem; z-index: 6; background: linear-gradient(180deg, #7C0A20, #A60F2D); border-bottom: 4px solid var(--gold);
+    box-shadow: 0 6px 14px rgba(0,0,0,.5); }
+  .curtain { position: fixed; top: 0; bottom: 0; width: 51%; z-index: 5; animation: close 2.8s cubic-bezier(.6, 0, .3, 1) forwards; animation-delay: 14s;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.35), transparent 30%, rgba(0,0,0,.28) 60%, transparent 85%, rgba(0,0,0,.35)),
+      repeating-linear-gradient(90deg, #6d0a1c 0 14px, #A60F2D 14px 34px, #7C0A20 34px 48px);
+    box-shadow: 0 0 40px rgba(0,0,0,.6); }
+  .curtain.l-c { left: 0; transform: translateX(-102%); --from: -102%; border-right: 3px solid var(--gold); }
+  .curtain.r-c { right: 0; transform: translateX(102%); --from: 102%; border-left: 3px solid var(--gold); }
+  @keyframes close { from { transform: translateX(var(--from)); } to { transform: translateX(0); } }
+
+  /* the end */
+  .end { position: fixed; inset: 0; z-index: 8; display: grid; place-content: center; justify-items: center; gap: .9rem; padding: 2rem 1.4rem calc(2rem + env(safe-area-inset-bottom)); text-align: center;
+    visibility: hidden; opacity: 0; animation: endin 1.6s ease forwards; animation-delay: 17.2s; }
+  @keyframes endin { 0% { visibility: visible; opacity: 0; transform: translateY(12px); } 100% { visibility: visible; opacity: 1; transform: none; } }
+  .end h1 { font: 700 clamp(3.2rem, 17vw, 4.8rem)/1 var(--engrave); letter-spacing: .06em;
+    background: linear-gradient(180deg, #FFF0B8, #C9A24A 55%, #8E6A1C); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 rgba(0,0,0,.5)); }
+  .end .nr { font: italic 500 1.1rem var(--serif); color: var(--cream); opacity: .85; }
+  .end .tag { margin-top: .6rem; max-width: 17rem; font: 700 1.6rem/1.1 var(--hand); color: var(--gold-lt); text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+  .acts { display: grid; gap: .8rem; margin-top: 1.2rem; justify-items: center; }
+  .acts a { color: var(--cream); text-decoration: none; }
+  .acts .again { padding: .85rem 2rem; border-radius: 999px; background: linear-gradient(180deg, #C41538, var(--crimson)); color: #fff; font: 700 .95rem var(--engrave); letter-spacing: .08em;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 0 7px rgba(201,162,74,.3), 0 10px 20px rgba(0,0,0,.5); }
+  .acts .back { font: 500 1rem var(--serif); opacity: .85; text-decoration: underline; text-underline-offset: 4px; }
+  .skip { position: fixed; z-index: 9; left: 0; right: 0; bottom: calc(.8rem + env(safe-area-inset-bottom)); text-align: center; font: 600 .6rem var(--engrave); letter-spacing: .3em; text-transform: uppercase; opacity: .45; pointer-events: none; animation: fade 1s ease 1s both; }
+  @keyframes fade { from { opacity: 0; } to { opacity: .45; } }
+
+  /* tap anywhere to jump to the end */
+  .done .l, .done .curtain, .done .end, .done .skip { animation-delay: 0s !important; animation-duration: .01s !important; }
+  .done .skip { display: none; }
+
+  :focus-visible { outline: 3px solid var(--gold-lt); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spot, .dust i, .skip { animation: none; display: none; }
+    .l { animation: none; opacity: 1; transform: none; }
+    .curtain, .valance { display: none; }
+    body { overflow: auto; }
+    .show { padding-bottom: 1rem; }
+    .end { position: static; animation: none; visibility: visible; opacity: 1; padding-top: 1rem; min-height: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" aria-hidden="true"><div class="spot"></div><div class="dust" id="dust"></div></div>
+
+<main class="show">
+  <p class="l l1" style="--t: .8s">Thank you for reading.</p>
+  <p class="l l2" style="--t: 3.4s">Five books. Five years. One love story.</p>
+  <p class="l l3" style="--t: 6s">Based on a true story: ours</p>
+  <div class="l count" style="--t: 8.6s">
+    <span class="lab">And still counting</span>
+    <div class="clock" id="clock" aria-live="off">
+      <div><b id="cd">0</b><small>days</small></div>
+      <div><b id="ch">0</b><small>hours</small></div>
+      <div><b id="cm">0</b><small>mins</small></div>
+      <div><b id="cs">0</b><small>secs</small></div>
+    </div>
+  </div>
+  <p class="l l5" style="--t: 11.4s">Happy 5th anniversary, my love.</p>
+</main>
+
+<div class="curtain l-c" aria-hidden="true"></div>
+<div class="curtain r-c" aria-hidden="true"></div>
+<div class="valance" aria-hidden="true"></div>
+
+<section class="end" aria-label="The end">
+  <h1>The End</h1>
+  <p class="nr">(Not really.)</p>
+  <p class="tag">Yours now and till the very end.</p>
+  <div class="acts">
+    <a class="again" href="year1.html">Read it again</a>
+    <a class="back" href="finale.html">Back to the letter</a>
+  </div>
+</section>
+
+<p class="skip" aria-hidden="true">tap to skip</p>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* the live clock: time together since 6 October 2021 */
+    var START = new Date(2021, 9, 6, 0, 0, 0).getTime();
+    var el = { d: document.getElementById("cd"), h: document.getElementById("ch"), m: document.getElementById("cm"), s: document.getElementById("cs") };
+    function tick() {
+      var ms = Math.max(0, Date.now() - START), t = Math.floor(ms / 1000);
+      el.d.textContent = Math.floor(t / 86400).toLocaleString("en");
+      el.h.textContent = Math.floor(t % 86400 / 3600);
+      el.m.textContent = Math.floor(t % 3600 / 60);
+      el.s.textContent = t % 60;
+    }
+    tick(); setInterval(tick, 1000);
+
+    /* a little dust in the spotlight */
+    if (!reduce) {
+      var dust = document.getElementById("dust"), r = function (a, b) { return a + Math.random() * (b - a); };
+      for (var i = 0; i < 18; i++) {
+        var m = document.createElement("i");
+        m.style.setProperty("--x", r(3, 97).toFixed(1) + "%");
+        m.style.setProperty("--s", r(2, 4.5).toFixed(1) + "px");
+        m.style.setProperty("--d", r(14, 28).toFixed(1) + "s");
+        m.style.setProperty("--delay", (-r(0, 26)).toFixed(1) + "s");
+        m.style.setProperty("--dx", r(-50, 50).toFixed(0) + "px");
+        dust.appendChild(m);
+      }
+    }
+
+    /* tap anywhere (not on a link) to skip straight to the ending */
+    document.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("a")) return;
+      document.documentElement.classList.add("done");
+      document.body.classList.add("done");
+    });
+  })();
+</script>
+</body>
+</html>
